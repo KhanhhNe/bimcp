@@ -6,9 +6,16 @@ indexers, methods, constructors, static members, enumeration, and type metadata.
 the C# `TomGen` project against the exact TOM assembly used by the bridge and generates strongly
 typed Go wrappers for every closed exported TOM class, interface, struct, and enum.
 
-Generated properties use their C# names as Go getter methods plus `SetX` setters. Methods retain
-their C# names. Overloads receive readable `With...` suffixes and pass their complete CLR parameter
-signature to the bridge, preventing runtime overload ambiguity.
+Readable scalar instance properties are fields on each generated TOM wrapper. Call `Snapshot` to
+populate all of them in one bridge call while preserving error handling at the interop boundary.
+Object and collection properties remain lazy getter methods, and writable properties have `SetX`
+setters. C# methods retain their names. Overloads receive readable `With...` suffixes and pass their
+complete CLR parameter signature to the bridge, preventing runtime overload ambiguity.
+
+```go
+table, err = table.Snapshot()
+fmt.Println(table.Name, table.IsHidden, table.IsPrivate)
+```
 
 ## Build and run
 
@@ -42,7 +49,8 @@ Generated wrappers are written to `tom\generated.go`:
 
 ```go
 typedModel := tom.AsModel(model)
-name, err := typedModel.Name()
+typedModel, err = typedModel.Snapshot()
+name := typedModel.Name
 tables, err := typedModel.Tables()
 err = typedModel.SaveChanges()
 ```

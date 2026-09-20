@@ -61,6 +61,7 @@ public static class NativeExports
             "connect" => Connect(command),
             "create" => Create(command),
             "get" => Get(command),
+            "snapshot" => Snapshot(command),
             "set" => Set(command),
             "getStatic" => GetStatic(command),
             "setStatic" => SetStatic(command),
@@ -152,6 +153,23 @@ public static class NativeExports
         var property = target.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public)
             ?? throw new MissingMemberException(target.GetType().FullName, name);
         return ToJson(property.GetValue(target));
+    }
+
+    private static JsonNode Snapshot(JsonObject command)
+    {
+        var target = GetHandle(command);
+        var properties = command["properties"]?.AsArray()
+            ?? throw new ArgumentException("Snapshot properties are required.");
+        var result = new JsonObject();
+        foreach (var propertyNode in properties)
+        {
+            var name = propertyNode?.GetValue<string>()
+                ?? throw new ArgumentException("Snapshot property names must be strings.");
+            var property = target.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public)
+                ?? throw new MissingMemberException(target.GetType().FullName, name);
+            result[name] = ToJson(property.GetValue(target));
+        }
+        return result;
     }
 
     private static JsonNode? Set(JsonObject command)

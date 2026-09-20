@@ -103,8 +103,25 @@ internal sealed class GoGenerator
     {
         var goName = _goNames[type];
         var clrName = FriendlyTypeName(type);
+        var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+            .Where(property => property.GetIndexParameters().Length == 0)
+            .GroupBy(property => property.Name, StringComparer.Ordinal)
+            .Select(group => group.First())
+            .OrderBy(property => property.Name, StringComparer.Ordinal)
+            .ToArray();
+        var snapshotProperties = SnapshotProperties(properties);
+
         Documentation(goName, type, $"Maps CLR type {clrName}.");
-        Line($"type {goName} struct {{ objectRef }}");
+        Line($"type {goName} struct {{");
+        Line("\tobjectRef");
+        foreach (var property in snapshotProperties)
+        {
+            var propertyName = Identifier(property.Name);
+            Documentation(propertyName, property, $"Gets {goName}.{property.Name}.", "\t");
+            Line($"\t{propertyName} {MapReturnType(property.PropertyType).GoType} " +
+                 $"`json:{Quote(property.Name)}`");
+        }
+        Line("}");
         Line();
         Documentation($"As{goName}", null, $"Wraps a managed TOM handle as {goName}.", learnLink: LearnLink(type));
         Line($"func As{goName}(value Value) {goName} {{ return {goName}{{objectRef: objectRef{{Value: value}}}} }}");
@@ -120,11 +137,9 @@ internal sealed class GoGenerator
             .Select(method => Identifier(method.Name))
             .ToHashSet(StringComparer.Ordinal);
 
-        foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                     .Where(property => property.GetIndexParameters().Length == 0)
-                     .GroupBy(property => property.Name, StringComparer.Ordinal)
-                     .Select(group => group.First())
-                     .OrderBy(property => property.Name, StringComparer.Ordinal))
+        GenerateSnapshot(goName, snapshotProperties, reservedInstanceNames);
+
+        foreach (var property in properties)
         {
             GenerateInstanceProperty(goName, property, reservedInstanceNames);
         }
@@ -139,6 +154,32 @@ internal sealed class GoGenerator
         GenerateStaticProperties(type, goName, clrName);
         GenerateStaticFields(type, goName, clrName);
         GenerateStaticMethods(type, goName, clrName);
+    }
+
+    private PropertyInfo[] SnapshotProperties(PropertyInfo[] properties) =>
+        properties
+            .Where(property => property.CanRead &&
+                               property.GetMethod is { IsStatic: false } &&
+                               MapReturnType(property.PropertyType).Kind == ReturnKind.Primitive)
+            .ToArray();
+
+    private void GenerateSnapshot(string owner, PropertyInfo[] snapshotProperties, HashSet<string> reservedNames)
+    {
+        if (snapshotProperties.Length == 0)
+        {
+            return;
+        }
+
+        var methodName = reservedNames.Contains("Snapshot") ? "ReadSnapshot" : "Snapshot";
+        Comment($"{methodName} returns a copy of {owner} with all scalar properties populated in one bridge call.", "");
+        Line($"func (receiver {owner}) {methodName}() ({owner}, error) {{");
+        Line("\tresult := receiver");
+        Line($"\terr := receiver.objectRef.Value.Snapshot([]string{{" +
+             string.Join(", ", snapshotProperties.Select(property => Quote(property.Name))) + "}, &result)");
+        Line("\treturn result, err");
+        Line("}");
+        Line();
+        GeneratedMemberCount++;
     }
 
     private void GenerateConstructors(Type type, string goName, string clrName)
@@ -167,7 +208,9 @@ internal sealed class GoGenerator
     {
         var propertyName = Identifier(property.Name);
         var getterName = reservedNames.Contains(propertyName) ? "Get" + propertyName : propertyName;
-        if (property.CanRead && property.GetMethod is { IsStatic: false })
+        if (property.CanRead &&
+            property.GetMethod is { IsStatic: false } &&
+            MapReturnType(property.PropertyType).Kind != ReturnKind.Primitive)
         {
             Documentation(getterName, property, $"Gets {owner}.{property.Name}.");
             GenerateReadBody($"func (receiver {owner}) {getterName}()", property.PropertyType,

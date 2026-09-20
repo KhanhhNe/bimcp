@@ -297,6 +297,13 @@ func (v Value) GetAny(name string) (any, error) {
 	return v.client.CallAny(map[string]any{"op": "get", "handle": v.Handle, "name": name})
 }
 
+// Snapshot reads multiple instance properties and decodes them into output.
+func (v Value) Snapshot(properties []string, output any) error {
+	return v.client.Call(map[string]any{
+		"op": "snapshot", "handle": v.Handle, "properties": properties,
+	}, output)
+}
+
 // Set assigns an instance property.
 func (v Value) Set(name string, value any) error {
 	return v.client.Call(map[string]any{"op": "set", "handle": v.Handle, "name": name, "value": encodeArg(value)}, nil)
