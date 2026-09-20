@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization.Metadata;
 using TOM = Microsoft.AnalysisServices.Tabular;
 
 namespace TomBridge;
@@ -15,6 +16,10 @@ public static class NativeExports
     private static readonly object Gate = new();
     private static readonly Dictionary<long, object> Handles = [];
     private static readonly Dictionary<object, long> ReverseHandles = new(ReferenceEqualityComparer.Instance);
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        TypeInfoResolver = new DefaultJsonTypeInfoResolver()
+    };
     private static long _nextHandle;
 
     [UnmanagedCallersOnly(EntryPoint = "tom_call", CallConvs = [typeof(CallConvCdecl)])]
@@ -29,7 +34,7 @@ public static class NativeExports
             {
                 ["ok"] = true,
                 ["result"] = result
-            }.ToJsonString());
+            }.ToJsonString(JsonOptions));
         }
         catch (Exception exception)
         {
@@ -40,7 +45,7 @@ public static class NativeExports
                 ["error"] = root.Message,
                 ["type"] = root.GetType().FullName,
                 ["stack"] = root.StackTrace
-            }.ToJsonString());
+            }.ToJsonString(JsonOptions));
         }
     }
 
@@ -411,9 +416,9 @@ public static class NativeExports
         if (targetType == typeof(decimal)) return node.GetValue<decimal>();
         if (targetType == typeof(Guid)) return Guid.Parse(node.GetValue<string>());
         if (targetType == typeof(DateTime)) return DateTime.Parse(node.GetValue<string>(), CultureInfo.InvariantCulture);
-        if (targetType == typeof(object)) return JsonSerializer.Deserialize<object>(node.ToJsonString());
+        if (targetType == typeof(object)) return JsonSerializer.Deserialize<object>(node.ToJsonString(JsonOptions), JsonOptions);
 
-        return JsonSerializer.Deserialize(node.ToJsonString(), targetType)
+        return JsonSerializer.Deserialize(node.ToJsonString(JsonOptions), targetType, JsonOptions)
             ?? throw new InvalidCastException($"Cannot convert JSON to {targetType.FullName}.");
     }
 
