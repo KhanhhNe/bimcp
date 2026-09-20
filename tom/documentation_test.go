@@ -10,6 +10,12 @@ import (
 	"testing"
 )
 
+var (
+	_ func(Model, int) ([]Table, error)   = Model.TableItems
+	_ func(Table, int) ([]Column, error)  = Table.ColumnItems
+	_ func(Table, int) ([]Measure, error) = Table.MeasureItems
+)
+
 func TestExportedDeclarationsHaveDocumentation(t *testing.T) {
 	_, currentFile, _, ok := runtime.Caller(0)
 	if !ok {

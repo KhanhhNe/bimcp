@@ -171,11 +171,7 @@ func testTOMConcurrency(database tom.Database, iterations int, workerSpec string
 	if err != nil {
 		return err
 	}
-	tables, err := model.Tables()
-	if err != nil {
-		return err
-	}
-	tableItems, err := tables.Items(0)
+	tableItems, err := model.TableItems(0)
 	if err != nil {
 		return err
 	}
@@ -185,8 +181,8 @@ func testTOMConcurrency(database tom.Database, iterations int, workerSpec string
 	var columnCollections []tom.ColumnCollection
 	var columns []tom.Column
 	var columnLabels []string
-	for _, item := range tableItems {
-		table, err := tom.AsTable(item).Snapshot()
+	for _, table := range tableItems {
+		table, err := table.Snapshot()
 		if err != nil {
 			return fmt.Errorf("read table properties: %w", err)
 		}
@@ -197,12 +193,11 @@ func testTOMConcurrency(database tom.Database, iterations int, workerSpec string
 			return fmt.Errorf("get columns for table %q: %w", table.Name, err)
 		}
 		columnCollections = append(columnCollections, columnCollection)
-		columnItems, err := columnCollection.Items(0)
+		columnItems, err := table.ColumnItems(0)
 		if err != nil {
 			return fmt.Errorf("enumerate columns for table %q: %w", table.Name, err)
 		}
-		for _, columnItem := range columnItems {
-			column := tom.AsColumn(columnItem)
+		for _, column := range columnItems {
 			snapshot, err := column.Snapshot()
 			if err != nil {
 				return fmt.Errorf("warm column snapshot for table %q: %w", table.Name, err)
@@ -463,36 +458,23 @@ func loadTOMTables(database tom.Database) ([]tableMetadata, error) {
 }
 
 func readTOMTables(model tom.Model) ([]tableMetadata, error) {
-	tables, err := model.Tables()
-	if err != nil {
-		return nil, err
-	}
-	tableItems, err := tables.Items(0)
+	tableItems, err := model.TableItems(0)
 	if err != nil {
 		return nil, err
 	}
 
 	result := make([]tableMetadata, 0, len(tableItems))
-	for _, item := range tableItems {
-		table := tom.AsTable(item)
+	for _, table := range tableItems {
 		table, err = table.Snapshot()
 		if err != nil {
 			return nil, fmt.Errorf("read table properties: %w", err)
 		}
 		name := table.Name
-		columns, err := table.Columns()
-		if err != nil {
-			return nil, fmt.Errorf("get columns for table %q: %w", name, err)
-		}
-		columnItems, err := columns.Items(0)
+		columnItems, err := table.ColumnItems(0)
 		if err != nil {
 			return nil, fmt.Errorf("enumerate columns for table %q: %w", name, err)
 		}
-		measures, err := table.Measures()
-		if err != nil {
-			return nil, fmt.Errorf("get measures for table %q: %w", name, err)
-		}
-		measureItems, err := measures.Items(0)
+		measureItems, err := table.MeasureItems(0)
 		if err != nil {
 			return nil, fmt.Errorf("enumerate measures for table %q: %w", name, err)
 		}
@@ -503,8 +485,7 @@ func readTOMTables(model tom.Model) ([]tableMetadata, error) {
 			isPrivate:            table.IsPrivate,
 			showAsVariationsOnly: table.ShowAsVariationsOnly,
 		}
-		for _, item := range columnItems {
-			column := tom.AsColumn(item)
+		for _, column := range columnItems {
 			column, err = column.Snapshot()
 			if err != nil {
 				return nil, fmt.Errorf("read column properties for table %q: %w", name, err)
@@ -516,8 +497,8 @@ func readTOMTables(model tom.Model) ([]tableMetadata, error) {
 			}
 			metadata.columns = append(metadata.columns, columnMetadata)
 		}
-		for _, item := range measureItems {
-			measure, err := tom.AsMeasure(item).Snapshot()
+		for _, measure := range measureItems {
+			measure, err := measure.Snapshot()
 			if err != nil {
 				return nil, fmt.Errorf("read measure properties for table %q: %w", name, err)
 			}
@@ -547,19 +528,12 @@ func readTOMColumn(tableName, columnName string, column tom.Column) (columnMetad
 		metadata.attributeHierarchyState = string(attributeHierarchy.State)
 	}
 
-	variations, err := column.Variations()
-	if err != nil {
-		return metadata, fmt.Errorf("get variations for column %q.%q: %w", tableName, columnName, err)
-	}
-	if variations.TOMValue().Handle == 0 {
-		return metadata, nil
-	}
-	variationItems, err := variations.Items(0)
+	variationItems, err := column.VariationItems(0)
 	if err != nil {
 		return metadata, fmt.Errorf("enumerate variations for column %q.%q: %w", tableName, columnName, err)
 	}
 	for _, item := range variationItems {
-		variation, err := readTOMVariation(tableName, columnName, tom.AsVariation(item))
+		variation, err := readTOMVariation(tableName, columnName, item)
 		if err != nil {
 			return metadata, err
 		}
@@ -658,20 +632,12 @@ func tomColumnReference(column tom.Column) (columnReference, error) {
 }
 
 func readCalculatedExpressions(tableName string, table tom.Table) ([]string, error) {
-	partitions, err := table.Partitions()
-	if err != nil {
-		return nil, fmt.Errorf("get partitions for table %q: %w", tableName, err)
-	}
-	if partitions.TOMValue().Handle == 0 {
-		return nil, nil
-	}
-	partitionItems, err := partitions.Items(0)
+	partitionItems, err := table.PartitionItems(0)
 	if err != nil {
 		return nil, fmt.Errorf("enumerate partitions for table %q: %w", tableName, err)
 	}
 	var expressions []string
-	for _, item := range partitionItems {
-		partition := tom.AsPartition(item)
+	for _, partition := range partitionItems {
 		partition, err = partition.Snapshot()
 		if err != nil {
 			return nil, fmt.Errorf("read partition properties for table %q: %w", tableName, err)

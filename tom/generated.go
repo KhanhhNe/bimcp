@@ -155,6 +155,23 @@ func (receiver AlternateOf) Annotations() (AlternateOfAnnotationCollection, erro
 	return AsAlternateOfAnnotationCollection(result), err
 }
 
+// AnnotationItems gets AlternateOf.Annotations and returns up to limit items.
+func (receiver AlternateOf) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // A reference ID to the referenced source column.
 //
 // Value:
@@ -2032,6 +2049,23 @@ func (receiver AttributeHierarchy) Annotations() (AttributeHierarchyAnnotationCo
 	return AsAttributeHierarchyAnnotationCollection(result), err
 }
 
+// AnnotationItems gets AttributeHierarchy.Annotations and returns up to limit items.
+func (receiver AttributeHierarchy) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // A reference to a Column object that owns this AttributeHierarchy.
 //
 // Value:
@@ -2057,6 +2091,23 @@ func (receiver AttributeHierarchy) Column() (Column, error) {
 func (receiver AttributeHierarchy) ExtendedProperties() (AttributeHierarchyExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsAttributeHierarchyExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets AttributeHierarchy.ExtendedProperties and returns up to limit items.
+func (receiver AttributeHierarchy) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // Gets the Tabular model that contains this object.
@@ -3145,6 +3196,23 @@ func (receiver BasicRefreshPolicy) Annotations() (RefreshPolicyAnnotationCollect
 	return AsRefreshPolicyAnnotationCollection(result), err
 }
 
+// AnnotationItems gets BasicRefreshPolicy.Annotations and returns up to limit items.
+func (receiver BasicRefreshPolicy) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all extendedproperties in the current RefreshPolicy.
 //
 // Value:
@@ -3155,6 +3223,23 @@ func (receiver BasicRefreshPolicy) Annotations() (RefreshPolicyAnnotationCollect
 func (receiver BasicRefreshPolicy) ExtendedProperties() (RefreshPolicyExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsRefreshPolicyExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets BasicRefreshPolicy.ExtendedProperties and returns up to limit items.
+func (receiver BasicRefreshPolicy) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // Granularity of the (most recent) incremental refresh range
@@ -3451,6 +3536,23 @@ func (receiver BindingInfo) Annotations() (BindingInfoAnnotationCollection, erro
 	return AsBindingInfoAnnotationCollection(result), err
 }
 
+// AnnotationItems gets BindingInfo.Annotations and returns up to limit items.
+func (receiver BindingInfo) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // The description of the object, visible to developers at design time and to administrators in management
 // tools, such as SQL Server Management Studio.
 //
@@ -3473,6 +3575,23 @@ func (receiver BindingInfo) SetDescription(input string) error {
 func (receiver BindingInfo) ExtendedProperties() (BindingInfoExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsBindingInfoExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets BindingInfo.ExtendedProperties and returns up to limit items.
+func (receiver BindingInfo) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // Gets the Tabular model that contains this object.
@@ -4778,6 +4897,23 @@ func (receiver CalculatedColumn) Annotations() (ColumnAnnotationCollection, erro
 	return AsColumnAnnotationCollection(result), err
 }
 
+// AnnotationItems gets CalculatedColumn.Annotations and returns up to limit items.
+func (receiver CalculatedColumn) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // A reference to an AttributeHierarchy object associated with this ColumnOrigin object.
 //
 // Value:
@@ -4814,6 +4950,23 @@ func (receiver CalculatedColumn) SetAttributeHierarchy(input AttributeHierarchy)
 func (receiver CalculatedColumn) ChangedProperties() (ColumnChangedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ChangedProperties")
 	return AsColumnChangedPropertyCollection(result), err
+}
+
+// ChangedPropertyItems gets CalculatedColumn.ChangedProperties and returns up to limit items.
+func (receiver CalculatedColumn) ChangedPropertyItems(limit int) ([]ChangedProperty, error) {
+	collection, err := receiver.ChangedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ChangedProperty, len(items))
+	for index := range items {
+		result[index] = AsChangedProperty(items[index])
+	}
+	return result, err
 }
 
 // Specifies the type of data contained in the column so that you can add custom behaviors based on column
@@ -4946,6 +5099,23 @@ func (receiver CalculatedColumn) SetExpressionContext(input ExpressionContext) e
 func (receiver CalculatedColumn) ExtendedProperties() (ColumnExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsColumnExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets CalculatedColumn.ExtendedProperties and returns up to limit items.
+func (receiver CalculatedColumn) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // A string that specifies the format of the column contents.
@@ -5425,6 +5595,23 @@ func (receiver CalculatedColumn) SetType(input ColumnType) error {
 func (receiver CalculatedColumn) Variations() (VariationCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("Variations")
 	return AsVariationCollection(result), err
+}
+
+// VariationItems gets CalculatedColumn.Variations and returns up to limit items.
+func (receiver CalculatedColumn) VariationItems(limit int) ([]Variation, error) {
+	collection, err := receiver.Variations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Variation, len(items))
+	for index := range items {
+		result[index] = AsVariation(items[index])
+	}
+	return result, err
 }
 
 // Creates a new, full copy of a Column object.
@@ -6052,6 +6239,23 @@ func (receiver CalculatedTableColumn) Annotations() (ColumnAnnotationCollection,
 	return AsColumnAnnotationCollection(result), err
 }
 
+// AnnotationItems gets CalculatedTableColumn.Annotations and returns up to limit items.
+func (receiver CalculatedTableColumn) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // A reference to an AttributeHierarchy object associated with this ColumnOrigin object.
 //
 // Value:
@@ -6088,6 +6292,23 @@ func (receiver CalculatedTableColumn) SetAttributeHierarchy(input AttributeHiera
 func (receiver CalculatedTableColumn) ChangedProperties() (ColumnChangedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ChangedProperties")
 	return AsColumnChangedPropertyCollection(result), err
+}
+
+// ChangedPropertyItems gets CalculatedTableColumn.ChangedProperties and returns up to limit items.
+func (receiver CalculatedTableColumn) ChangedPropertyItems(limit int) ([]ChangedProperty, error) {
+	collection, err := receiver.ChangedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ChangedProperty, len(items))
+	for index := range items {
+		result[index] = AsChangedProperty(items[index])
+	}
+	return result, err
 }
 
 // Returns a ColumnOrigin object. Applicable only to non-calculated columns of a calculated table. ColumnOrigin
@@ -6208,6 +6429,23 @@ func (receiver CalculatedTableColumn) SetErrorMessage(input string) error {
 func (receiver CalculatedTableColumn) ExtendedProperties() (ColumnExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsColumnExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets CalculatedTableColumn.ExtendedProperties and returns up to limit items.
+func (receiver CalculatedTableColumn) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // A string that specifies the format of the column contents.
@@ -6713,6 +6951,23 @@ func (receiver CalculatedTableColumn) Variations() (VariationCollection, error) 
 	return AsVariationCollection(result), err
 }
 
+// VariationItems gets CalculatedTableColumn.Variations and returns up to limit items.
+func (receiver CalculatedTableColumn) VariationItems(limit int) ([]Variation, error) {
+	collection, err := receiver.Variations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Variation, len(items))
+	for index := range items {
+		result[index] = AsVariation(items[index])
+	}
+	return result, err
+}
+
 // Creates a new, full copy of a Column object.
 //
 // Remarks:
@@ -6885,6 +7140,23 @@ func (receiver CalculationGroup) Annotations() (CalculationGroupAnnotationCollec
 	return AsCalculationGroupAnnotationCollection(result), err
 }
 
+// AnnotationItems gets CalculationGroup.Annotations and returns up to limit items.
+func (receiver CalculationGroup) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all calculationitems in the current CalculationGroup.
 //
 // Value:
@@ -6895,6 +7167,23 @@ func (receiver CalculationGroup) Annotations() (CalculationGroupAnnotationCollec
 func (receiver CalculationGroup) CalculationItems() (CalculationItemCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("CalculationItems")
 	return AsCalculationItemCollection(result), err
+}
+
+// CalculationItemItems gets CalculationGroup.CalculationItems and returns up to limit items.
+func (receiver CalculationGroup) CalculationItemItems(limit int) ([]CalculationItem, error) {
+	collection, err := receiver.CalculationItems()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]CalculationItem, len(items))
+	for index := range items {
+		result[index] = AsCalculationItem(items[index])
+	}
+	return result, err
 }
 
 // The description of the CalculationGroup, visible to developers at design time and to administrators in
@@ -8403,6 +8692,23 @@ func (receiver Calendar) Snapshot() (Calendar, error) {
 func (receiver Calendar) CalendarColumnGroups() (CalendarColumnGroupCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("CalendarColumnGroups")
 	return AsCalendarColumnGroupCollection(result), err
+}
+
+// CalendarColumnGroupItems gets Calendar.CalendarColumnGroups and returns up to limit items.
+func (receiver Calendar) CalendarColumnGroupItems(limit int) ([]CalendarColumnGroup, error) {
+	collection, err := receiver.CalendarColumnGroups()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]CalendarColumnGroup, len(items))
+	for index := range items {
+		result[index] = AsCalendarColumnGroup(items[index])
+	}
+	return result, err
 }
 
 // The description of the Calendar, visible to developers at design time and to administrators in management
@@ -10572,6 +10878,23 @@ func (receiver Column) Annotations() (ColumnAnnotationCollection, error) {
 	return AsColumnAnnotationCollection(result), err
 }
 
+// AnnotationItems gets Column.Annotations and returns up to limit items.
+func (receiver Column) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // A reference to an AttributeHierarchy object associated with this ColumnOrigin object.
 //
 // Value:
@@ -10608,6 +10931,23 @@ func (receiver Column) SetAttributeHierarchy(input AttributeHierarchy) error {
 func (receiver Column) ChangedProperties() (ColumnChangedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ChangedProperties")
 	return AsColumnChangedPropertyCollection(result), err
+}
+
+// ChangedPropertyItems gets Column.ChangedProperties and returns up to limit items.
+func (receiver Column) ChangedPropertyItems(limit int) ([]ChangedProperty, error) {
+	collection, err := receiver.ChangedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ChangedProperty, len(items))
+	for index := range items {
+		result[index] = AsChangedProperty(items[index])
+	}
+	return result, err
 }
 
 // Specifies the type of data contained in the column so that you can add custom behaviors based on column
@@ -10715,6 +11055,23 @@ func (receiver Column) SetErrorMessage(input string) error {
 func (receiver Column) ExtendedProperties() (ColumnExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsColumnExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets Column.ExtendedProperties and returns up to limit items.
+func (receiver Column) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // A string that specifies the format of the column contents.
@@ -11194,6 +11551,23 @@ func (receiver Column) SetType(input ColumnType) error {
 func (receiver Column) Variations() (VariationCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("Variations")
 	return AsVariationCollection(result), err
+}
+
+// VariationItems gets Column.Variations and returns up to limit items.
+func (receiver Column) VariationItems(limit int) ([]Variation, error) {
+	collection, err := receiver.Variations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Variation, len(items))
+	for index := range items {
+		result[index] = AsVariation(items[index])
+	}
+	return result, err
 }
 
 // Creates a new, full copy of a Column object.
@@ -12225,6 +12599,23 @@ func (receiver ColumnPermission) Annotations() (ColumnPermissionAnnotationCollec
 	return AsColumnPermissionAnnotationCollection(result), err
 }
 
+// AnnotationItems gets ColumnPermission.Annotations and returns up to limit items.
+func (receiver ColumnPermission) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // A reference to a Column object associated with this ColumnPermission.
 //
 // Value:
@@ -12258,6 +12649,23 @@ func (receiver ColumnPermission) SetColumn(input Column) error {
 func (receiver ColumnPermission) ExtendedProperties() (ColumnPermissionExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsColumnPermissionExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets ColumnPermission.ExtendedProperties and returns up to limit items.
+func (receiver ColumnPermission) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // Defines whether the metadata of this column should be secured from users belonging to this role.
@@ -15547,6 +15955,23 @@ func (receiver Culture) Annotations() (CultureAnnotationCollection, error) {
 	return AsCultureAnnotationCollection(result), err
 }
 
+// AnnotationItems gets Culture.Annotations and returns up to limit items.
+func (receiver Culture) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all extendedproperties in the current Culture.
 //
 // Remarks:
@@ -15560,6 +15985,23 @@ func (receiver Culture) Annotations() (CultureAnnotationCollection, error) {
 func (receiver Culture) ExtendedProperties() (CultureExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsCultureExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets Culture.ExtendedProperties and returns up to limit items.
+func (receiver Culture) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // A reference to a LinguisticMetadata object associated with this Culture object.
@@ -15629,6 +16071,23 @@ func (receiver Culture) SetName(input string) error {
 func (receiver Culture) ObjectTranslations() (ObjectTranslationCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ObjectTranslations")
 	return AsObjectTranslationCollection(result), err
+}
+
+// ObjectTranslationItems gets Culture.ObjectTranslations and returns up to limit items.
+func (receiver Culture) ObjectTranslationItems(limit int) ([]ObjectTranslation, error) {
+	collection, err := receiver.ObjectTranslations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ObjectTranslation, len(items))
+	for index := range items {
+		result[index] = AsObjectTranslation(items[index])
+	}
+	return result, err
 }
 
 // Gets the parent of the current MetadataObject.
@@ -16710,6 +17169,23 @@ func (receiver DataBindingHint) Annotations() (BindingInfoAnnotationCollection, 
 	return AsBindingInfoAnnotationCollection(result), err
 }
 
+// AnnotationItems gets DataBindingHint.Annotations and returns up to limit items.
+func (receiver DataBindingHint) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // The connection id of the data connection in Fabric that should be used to bind the referenced data source.
 //
 // Value:
@@ -16743,6 +17219,23 @@ func (receiver DataBindingHint) SetDescription(input string) error {
 func (receiver DataBindingHint) ExtendedProperties() (BindingInfoExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsBindingInfoExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets DataBindingHint.ExtendedProperties and returns up to limit items.
+func (receiver DataBindingHint) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // Gets the Tabular model that contains this object.
@@ -17311,6 +17804,23 @@ func (receiver DataColumn) Annotations() (ColumnAnnotationCollection, error) {
 	return AsColumnAnnotationCollection(result), err
 }
 
+// AnnotationItems gets DataColumn.Annotations and returns up to limit items.
+func (receiver DataColumn) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // A reference to an AttributeHierarchy object associated with this ColumnOrigin object.
 //
 // Value:
@@ -17347,6 +17857,23 @@ func (receiver DataColumn) SetAttributeHierarchy(input AttributeHierarchy) error
 func (receiver DataColumn) ChangedProperties() (ColumnChangedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ChangedProperties")
 	return AsColumnChangedPropertyCollection(result), err
+}
+
+// ChangedPropertyItems gets DataColumn.ChangedProperties and returns up to limit items.
+func (receiver DataColumn) ChangedPropertyItems(limit int) ([]ChangedProperty, error) {
+	collection, err := receiver.ChangedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ChangedProperty, len(items))
+	for index := range items {
+		result[index] = AsChangedProperty(items[index])
+	}
+	return result, err
 }
 
 // Specifies the type of data contained in the column so that you can add custom behaviors based on column
@@ -17454,6 +17981,23 @@ func (receiver DataColumn) SetErrorMessage(input string) error {
 func (receiver DataColumn) ExtendedProperties() (ColumnExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsColumnExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets DataColumn.ExtendedProperties and returns up to limit items.
+func (receiver DataColumn) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // A string that specifies the format of the column contents.
@@ -17947,6 +18491,23 @@ func (receiver DataColumn) Variations() (VariationCollection, error) {
 	return AsVariationCollection(result), err
 }
 
+// VariationItems gets DataColumn.Variations and returns up to limit items.
+func (receiver DataColumn) VariationItems(limit int) ([]Variation, error) {
+	collection, err := receiver.Variations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Variation, len(items))
+	for index := range items {
+		result[index] = AsVariation(items[index])
+	}
+	return result, err
+}
+
 // Creates a new, full copy of a Column object.
 //
 // Remarks:
@@ -18140,6 +18701,23 @@ func (receiver DataCoverageDefinition) Snapshot() (DataCoverageDefinition, error
 func (receiver DataCoverageDefinition) Annotations() (DataCoverageDefinitionAnnotationCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("Annotations")
 	return AsDataCoverageDefinitionAnnotationCollection(result), err
+}
+
+// AnnotationItems gets DataCoverageDefinition.Annotations and returns up to limit items.
+func (receiver DataCoverageDefinition) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
 }
 
 // The description of the DataCoverageDefinition, visible to developers at design time and to administrators in
@@ -19488,6 +20066,23 @@ func (receiver DataSource) Annotations() (DataSourceAnnotationCollection, error)
 	return AsDataSourceAnnotationCollection(result), err
 }
 
+// AnnotationItems gets DataSource.Annotations and returns up to limit items.
+func (receiver DataSource) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // The description of the data source, visible to developers at design time and to administrators in management
 // tools, such as SQL Server Management Studio.
 //
@@ -19513,6 +20108,23 @@ func (receiver DataSource) SetDescription(input string) error {
 func (receiver DataSource) ExtendedProperties() (DataSourceExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsDataSourceExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets DataSource.ExtendedProperties and returns up to limit items.
+func (receiver DataSource) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // The maximum number of connections to be opened concurrently to the data source.
@@ -25771,6 +26383,23 @@ func (receiver ExternalModelRoleMember) Annotations() (ModelRoleMemberAnnotation
 	return AsModelRoleMemberAnnotationCollection(result), err
 }
 
+// AnnotationItems gets ExternalModelRoleMember.Annotations and returns up to limit items.
+func (receiver ExternalModelRoleMember) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all extendedproperties in the current ModelRoleMember.
 //
 // Remarks:
@@ -25784,6 +26413,23 @@ func (receiver ExternalModelRoleMember) Annotations() (ModelRoleMemberAnnotation
 func (receiver ExternalModelRoleMember) ExtendedProperties() (ModelRoleMemberExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsModelRoleMemberExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets ExternalModelRoleMember.ExtendedProperties and returns up to limit items.
+func (receiver ExternalModelRoleMember) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // A string that defines the identity provider used for authentication.
@@ -26606,6 +27252,23 @@ func (receiver Function) Annotations() (FunctionAnnotationCollection, error) {
 	return AsFunctionAnnotationCollection(result), err
 }
 
+// AnnotationItems gets Function.Annotations and returns up to limit items.
+func (receiver Function) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all changedproperties in the current Function.
 //
 // Value:
@@ -26616,6 +27279,23 @@ func (receiver Function) Annotations() (FunctionAnnotationCollection, error) {
 func (receiver Function) ChangedProperties() (FunctionChangedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ChangedProperties")
 	return AsFunctionChangedPropertyCollection(result), err
+}
+
+// ChangedPropertyItems gets Function.ChangedProperties and returns up to limit items.
+func (receiver Function) ChangedPropertyItems(limit int) ([]ChangedProperty, error) {
+	collection, err := receiver.ChangedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ChangedProperty, len(items))
+	for index := range items {
+		result[index] = AsChangedProperty(items[index])
+	}
+	return result, err
 }
 
 // The description of the user-defined function, visible to developers at design time and to administrators in
@@ -26663,6 +27343,23 @@ func (receiver Function) SetExpression(input string) error {
 func (receiver Function) ExtendedProperties() (FunctionExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsFunctionExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets Function.ExtendedProperties and returns up to limit items.
+func (receiver Function) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // A boolean value that indicates whether the function is treated as hidden by client visualization tools. True
@@ -28247,6 +28944,23 @@ func (receiver Hierarchy) Annotations() (HierarchyAnnotationCollection, error) {
 	return AsHierarchyAnnotationCollection(result), err
 }
 
+// AnnotationItems gets Hierarchy.Annotations and returns up to limit items.
+func (receiver Hierarchy) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all changedproperties in the current Hierarchy.
 //
 // Remarks:
@@ -28260,6 +28974,23 @@ func (receiver Hierarchy) Annotations() (HierarchyAnnotationCollection, error) {
 func (receiver Hierarchy) ChangedProperties() (HierarchyChangedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ChangedProperties")
 	return AsHierarchyChangedPropertyCollection(result), err
+}
+
+// ChangedPropertyItems gets Hierarchy.ChangedProperties and returns up to limit items.
+func (receiver Hierarchy) ChangedPropertyItems(limit int) ([]ChangedProperty, error) {
+	collection, err := receiver.ChangedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ChangedProperty, len(items))
+	for index := range items {
+		result[index] = AsChangedProperty(items[index])
+	}
+	return result, err
 }
 
 // The description of the hierarchy, visible to developers at design time and to administrators in management
@@ -28300,6 +29031,23 @@ func (receiver Hierarchy) ExcludedArtifacts() (HierarchyExcludedArtifactCollecti
 	return AsHierarchyExcludedArtifactCollection(result), err
 }
 
+// ExcludedArtifactItems gets Hierarchy.ExcludedArtifacts and returns up to limit items.
+func (receiver Hierarchy) ExcludedArtifactItems(limit int) ([]ExcludedArtifact, error) {
+	collection, err := receiver.ExcludedArtifacts()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExcludedArtifact, len(items))
+	for index := range items {
+		result[index] = AsExcludedArtifact(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all extendedproperties in the current Hierarchy.
 //
 // Remarks:
@@ -28313,6 +29061,23 @@ func (receiver Hierarchy) ExcludedArtifacts() (HierarchyExcludedArtifactCollecti
 func (receiver Hierarchy) ExtendedProperties() (HierarchyExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsHierarchyExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets Hierarchy.ExtendedProperties and returns up to limit items.
+func (receiver Hierarchy) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // Ragged/unbalanced hierarchies can be enabled by hiding members using this property.
@@ -28351,6 +29116,23 @@ func (receiver Hierarchy) SetIsHidden(input bool) error {
 func (receiver Hierarchy) Levels() (LevelCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("Levels")
 	return AsLevelCollection(result), err
+}
+
+// LevelItems gets Hierarchy.Levels and returns up to limit items.
+func (receiver Hierarchy) LevelItems(limit int) ([]Level, error) {
+	collection, err := receiver.Levels()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Level, len(items))
+	for index := range items {
+		result[index] = AsLevel(items[index])
+	}
+	return result, err
 }
 
 // A tag that represents the lineage of the object.
@@ -32128,6 +32910,23 @@ func (receiver KPI) Annotations() (KPIAnnotationCollection, error) {
 	return AsKPIAnnotationCollection(result), err
 }
 
+// AnnotationItems gets KPI.Annotations and returns up to limit items.
+func (receiver KPI) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // The description of the KPI, visible to developers at design time and to administrators in management tools,
 // such as SQL Server Management Studio.
 //
@@ -32153,6 +32952,23 @@ func (receiver KPI) SetDescription(input string) error {
 func (receiver KPI) ExtendedProperties() (KPIExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsKPIExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets KPI.ExtendedProperties and returns up to limit items.
+func (receiver KPI) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // A reference to a Measure object that owns this KPI.
@@ -32956,6 +33772,23 @@ func (receiver Level) Annotations() (LevelAnnotationCollection, error) {
 	return AsLevelAnnotationCollection(result), err
 }
 
+// AnnotationItems gets Level.Annotations and returns up to limit items.
+func (receiver Level) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all changedproperties in the current Level.
 //
 // Remarks:
@@ -32969,6 +33802,23 @@ func (receiver Level) Annotations() (LevelAnnotationCollection, error) {
 func (receiver Level) ChangedProperties() (LevelChangedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ChangedProperties")
 	return AsLevelChangedPropertyCollection(result), err
+}
+
+// ChangedPropertyItems gets Level.ChangedProperties and returns up to limit items.
+func (receiver Level) ChangedPropertyItems(limit int) ([]ChangedProperty, error) {
+	collection, err := receiver.ChangedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ChangedProperty, len(items))
+	for index := range items {
+		result[index] = AsChangedProperty(items[index])
+	}
+	return result, err
 }
 
 // A reference to a Column object associated with this Level.
@@ -33019,6 +33869,23 @@ func (receiver Level) SetDescription(input string) error {
 func (receiver Level) ExtendedProperties() (LevelExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsLevelExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets Level.ExtendedProperties and returns up to limit items.
+func (receiver Level) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // A reference to a Hierarchy object that owns this level.
@@ -34161,6 +35028,23 @@ func (receiver LinguisticMetadata) Annotations() (LinguisticMetadataAnnotationCo
 	return AsLinguisticMetadataAnnotationCollection(result), err
 }
 
+// AnnotationItems gets LinguisticMetadata.Annotations and returns up to limit items.
+func (receiver LinguisticMetadata) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // A string that contains the natural language synonyms.
 //
 // Value:
@@ -34211,6 +35095,23 @@ func (receiver LinguisticMetadata) Culture() (Culture, error) {
 func (receiver LinguisticMetadata) ExtendedProperties() (LinguisticMetadataExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsLinguisticMetadataExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets LinguisticMetadata.ExtendedProperties and returns up to limit items.
+func (receiver LinguisticMetadata) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // Gets the Tabular model that contains this object.
@@ -35088,6 +35989,23 @@ func (receiver Measure) Annotations() (MeasureAnnotationCollection, error) {
 	return AsMeasureAnnotationCollection(result), err
 }
 
+// AnnotationItems gets Measure.Annotations and returns up to limit items.
+func (receiver Measure) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all changedproperties in the current Measure.
 //
 // Remarks:
@@ -35101,6 +36019,23 @@ func (receiver Measure) Annotations() (MeasureAnnotationCollection, error) {
 func (receiver Measure) ChangedProperties() (MeasureChangedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ChangedProperties")
 	return AsMeasureChangedPropertyCollection(result), err
+}
+
+// ChangedPropertyItems gets Measure.ChangedProperties and returns up to limit items.
+func (receiver Measure) ChangedPropertyItems(limit int) ([]ChangedProperty, error) {
+	collection, err := receiver.ChangedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ChangedProperty, len(items))
+	for index := range items {
+		result[index] = AsChangedProperty(items[index])
+	}
+	return result, err
 }
 
 // Specifies the type of data contained in the measure so that you can add custom behaviors based on measure
@@ -35220,6 +36155,23 @@ func (receiver Measure) SetExpression(input string) error {
 func (receiver Measure) ExtendedProperties() (MeasureExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsMeasureExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets Measure.ExtendedProperties and returns up to limit items.
+func (receiver Measure) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // A string that specifies the format of the measure contents.
@@ -36910,6 +37862,23 @@ func (receiver Model) AnalyticsAIMetadata() (AnalyticsAIMetadataCollection, erro
 	return AsAnalyticsAIMetadataCollection(result), err
 }
 
+// AnalyticsAIMetadataItems gets Model.AnalyticsAIMetadata and returns up to limit items.
+func (receiver Model) AnalyticsAIMetadataItems(limit int) ([]AnalyticsAIMetadata, error) {
+	collection, err := receiver.AnalyticsAIMetadata()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]AnalyticsAIMetadata, len(items))
+	for index := range items {
+		result[index] = AsAnalyticsAIMetadata(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all annotations in the current Model.
 //
 // Value:
@@ -36920,6 +37889,23 @@ func (receiver Model) AnalyticsAIMetadata() (AnalyticsAIMetadataCollection, erro
 func (receiver Model) Annotations() (ModelAnnotationCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("Annotations")
 	return AsModelAnnotationCollection(result), err
+}
+
+// AnnotationItems gets Model.Annotations and returns up to limit items.
+func (receiver Model) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
 }
 
 // Options for the automatic aggregation.
@@ -36966,6 +37952,23 @@ func (receiver Model) BindingInfoCollection() (BindingInfoCollection, error) {
 	return AsBindingInfoCollection(result), err
 }
 
+// BindingInfoItems gets Model.BindingInfoCollection and returns up to limit items.
+func (receiver Model) BindingInfoItems(limit int) ([]BindingInfo, error) {
+	collection, err := receiver.BindingInfoCollection()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]BindingInfo, len(items))
+	for index := range items {
+		result[index] = AsBindingInfo(items[index])
+	}
+	return result, err
+}
+
 // The collation sequence. Analysis Services uses Windows collations.
 //
 // Value:
@@ -36998,6 +38001,23 @@ func (receiver Model) SetCulture(input string) error {
 func (receiver Model) Cultures() (CultureCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("Cultures")
 	return AsCultureCollection(result), err
+}
+
+// CultureItems gets Model.Cultures and returns up to limit items.
+func (receiver Model) CultureItems(limit int) ([]Culture, error) {
+	collection, err := receiver.Cultures()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Culture, len(items))
+	for index := range items {
+		result[index] = AsCulture(items[index])
+	}
+	return result, err
 }
 
 // Options for the M data engine.
@@ -37068,6 +38088,23 @@ func (receiver Model) SetDataSourceVariablesOverrideBehavior(input DataSourceVar
 func (receiver Model) DataSources() (DataSourceCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("DataSources")
 	return AsDataSourceCollection(result), err
+}
+
+// DataSourceItems gets Model.DataSources and returns up to limit items.
+func (receiver Model) DataSourceItems(limit int) ([]DataSource, error) {
+	collection, err := receiver.DataSources()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]DataSource, len(items))
+	for index := range items {
+		result[index] = AsDataSource(items[index])
+	}
+	return result, err
 }
 
 // Gets the parent database of the model.
@@ -37273,6 +38310,23 @@ func (receiver Model) ExcludedArtifacts() (ModelExcludedArtifactCollection, erro
 	return AsModelExcludedArtifactCollection(result), err
 }
 
+// ExcludedArtifactItems gets Model.ExcludedArtifacts and returns up to limit items.
+func (receiver Model) ExcludedArtifactItems(limit int) ([]ExcludedArtifact, error) {
+	collection, err := receiver.ExcludedArtifacts()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExcludedArtifact, len(items))
+	for index := range items {
+		result[index] = AsExcludedArtifact(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all expressions in the current Model.
 //
 // Remarks:
@@ -37288,6 +38342,23 @@ func (receiver Model) Expressions() (NamedExpressionCollection, error) {
 	return AsNamedExpressionCollection(result), err
 }
 
+// NamedExpressionItems gets Model.Expressions and returns up to limit items.
+func (receiver Model) NamedExpressionItems(limit int) ([]NamedExpression, error) {
+	collection, err := receiver.Expressions()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]NamedExpression, len(items))
+	for index := range items {
+		result[index] = AsNamedExpression(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all extendedproperties in the current Model.
 //
 // Remarks:
@@ -37301,6 +38372,23 @@ func (receiver Model) Expressions() (NamedExpressionCollection, error) {
 func (receiver Model) ExtendedProperties() (ModelExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsModelExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets Model.ExtendedProperties and returns up to limit items.
+func (receiver Model) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // Determines whether measures can have the same names as any column in the model.
@@ -37330,6 +38418,23 @@ func (receiver Model) SetForceUniqueNames(input bool) error {
 func (receiver Model) Functions() (FunctionCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("Functions")
 	return AsFunctionCollection(result), err
+}
+
+// FunctionItems gets Model.Functions and returns up to limit items.
+func (receiver Model) FunctionItems(limit int) ([]Function, error) {
+	collection, err := receiver.Functions()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Function, len(items))
+	for index := range items {
+		result[index] = AsFunction(items[index])
+	}
+	return result, err
 }
 
 // The string that has M attributes.
@@ -37439,6 +38544,23 @@ func (receiver Model) Packages() (PackageCollection, error) {
 	return AsPackageCollection(result), err
 }
 
+// PackageItems gets Model.Packages and returns up to limit items.
+func (receiver Model) PackageItems(limit int) ([]Package, error) {
+	collection, err := receiver.Packages()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Package, len(items))
+	for index := range items {
+		result[index] = AsPackage(items[index])
+	}
+	return result, err
+}
+
 // Gets the parent of the current MetadataObject.
 //
 // Value:
@@ -37474,6 +38596,23 @@ func (receiver Model) Perspectives() (PerspectiveCollection, error) {
 	return AsPerspectiveCollection(result), err
 }
 
+// PerspectiveItems gets Model.Perspectives and returns up to limit items.
+func (receiver Model) PerspectiveItems(limit int) ([]Perspective, error) {
+	collection, err := receiver.Perspectives()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Perspective, len(items))
+	for index := range items {
+		result[index] = AsPerspective(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all querygroups in the current Model.
 //
 // Remarks:
@@ -37489,6 +38628,23 @@ func (receiver Model) QueryGroups() (QueryGroupCollection, error) {
 	return AsQueryGroupCollection(result), err
 }
 
+// QueryGroupItems gets Model.QueryGroups and returns up to limit items.
+func (receiver Model) QueryGroupItems(limit int) ([]QueryGroup, error) {
+	collection, err := receiver.QueryGroups()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]QueryGroup, len(items))
+	for index := range items {
+		result[index] = AsQueryGroup(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all relationships in the current Model.
 //
 // Value:
@@ -37501,6 +38657,23 @@ func (receiver Model) Relationships() (RelationshipCollection, error) {
 	return AsRelationshipCollection(result), err
 }
 
+// RelationshipItems gets Model.Relationships and returns up to limit items.
+func (receiver Model) RelationshipItems(limit int) ([]Relationship, error) {
+	collection, err := receiver.Relationships()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Relationship, len(items))
+	for index := range items {
+		result[index] = AsRelationship(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all roles in the current Model.
 //
 // Value:
@@ -37511,6 +38684,23 @@ func (receiver Model) Relationships() (RelationshipCollection, error) {
 func (receiver Model) Roles() (ModelRoleCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("Roles")
 	return AsModelRoleCollection(result), err
+}
+
+// ModelRoleItems gets Model.Roles and returns up to limit items.
+func (receiver Model) ModelRoleItems(limit int) ([]ModelRole, error) {
+	collection, err := receiver.Roles()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ModelRole, len(items))
+	for index := range items {
+		result[index] = AsModelRole(items[index])
+	}
+	return result, err
 }
 
 // Determines Selection Expression behavior for Calculation Groups
@@ -37584,6 +38774,23 @@ func (receiver Model) SetStructureModifiedTime(input string) error {
 func (receiver Model) Tables() (TableCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("Tables")
 	return AsTableCollection(result), err
+}
+
+// TableItems gets Model.Tables and returns up to limit items.
+func (receiver Model) TableItems(limit int) ([]Table, error) {
+	collection, err := receiver.Tables()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Table, len(items))
+	for index := range items {
+		result[index] = AsTable(items[index])
+	}
+	return result, err
 }
 
 // Determines value filter behavior for SummarizeColumns
@@ -38908,6 +40115,23 @@ func (receiver ModelRole) Annotations() (ModelRoleAnnotationCollection, error) {
 	return AsModelRoleAnnotationCollection(result), err
 }
 
+// AnnotationItems gets ModelRole.Annotations and returns up to limit items.
+func (receiver ModelRole) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // The description of the role, visible to developers at design time and to administrators in management tools,
 // such as SQL Server Management Studio.
 //
@@ -38935,6 +40159,23 @@ func (receiver ModelRole) ExtendedProperties() (ModelRoleExtendedPropertyCollect
 	return AsModelRoleExtendedPropertyCollection(result), err
 }
 
+// ExtendedPropertyItems gets ModelRole.ExtendedProperties and returns up to limit items.
+func (receiver ModelRole) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all members in the current ModelRole.
 //
 // Value:
@@ -38945,6 +40186,23 @@ func (receiver ModelRole) ExtendedProperties() (ModelRoleExtendedPropertyCollect
 func (receiver ModelRole) Members() (ModelRoleMemberCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("Members")
 	return AsModelRoleMemberCollection(result), err
+}
+
+// ModelRoleMemberItems gets ModelRole.Members and returns up to limit items.
+func (receiver ModelRole) ModelRoleMemberItems(limit int) ([]ModelRoleMember, error) {
+	collection, err := receiver.Members()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ModelRoleMember, len(items))
+	for index := range items {
+		result[index] = AsModelRoleMember(items[index])
+	}
+	return result, err
 }
 
 // Gets the Tabular model that contains this object.
@@ -39028,6 +40286,23 @@ func (receiver ModelRole) SetParent(input MetadataObject) error {
 func (receiver ModelRole) TablePermissions() (TablePermissionCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("TablePermissions")
 	return AsTablePermissionCollection(result), err
+}
+
+// TablePermissionItems gets ModelRole.TablePermissions and returns up to limit items.
+func (receiver ModelRole) TablePermissionItems(limit int) ([]TablePermission, error) {
+	collection, err := receiver.TablePermissions()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]TablePermission, len(items))
+	for index := range items {
+		result[index] = AsTablePermission(items[index])
+	}
+	return result, err
 }
 
 // Creates a new, full copy of a ModelRole object.
@@ -39892,6 +41167,23 @@ func (receiver ModelRoleMember) Annotations() (ModelRoleMemberAnnotationCollecti
 	return AsModelRoleMemberAnnotationCollection(result), err
 }
 
+// AnnotationItems gets ModelRoleMember.Annotations and returns up to limit items.
+func (receiver ModelRoleMember) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all extendedproperties in the current ModelRoleMember.
 //
 // Remarks:
@@ -39905,6 +41197,23 @@ func (receiver ModelRoleMember) Annotations() (ModelRoleMemberAnnotationCollecti
 func (receiver ModelRoleMember) ExtendedProperties() (ModelRoleMemberExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsModelRoleMemberExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets ModelRoleMember.ExtendedProperties and returns up to limit items.
+func (receiver ModelRoleMember) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // A reference to a Member object associated with this RoleMembership.
@@ -40907,6 +42216,23 @@ func (receiver NamedExpression) Annotations() (NamedExpressionAnnotationCollecti
 	return AsNamedExpressionAnnotationCollection(result), err
 }
 
+// AnnotationItems gets NamedExpression.Annotations and returns up to limit items.
+func (receiver NamedExpression) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // The description of the expression, visible to developers at design time and to administrators in management
 // tools, such as SQL Server Management Studio.
 //
@@ -40932,6 +42258,23 @@ func (receiver NamedExpression) SetDescription(input string) error {
 func (receiver NamedExpression) ExcludedArtifacts() (NamedExpressionExcludedArtifactCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExcludedArtifacts")
 	return AsNamedExpressionExcludedArtifactCollection(result), err
+}
+
+// ExcludedArtifactItems gets NamedExpression.ExcludedArtifacts and returns up to limit items.
+func (receiver NamedExpression) ExcludedArtifactItems(limit int) ([]ExcludedArtifact, error) {
+	collection, err := receiver.ExcludedArtifacts()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExcludedArtifact, len(items))
+	for index := range items {
+		result[index] = AsExcludedArtifact(items[index])
+	}
+	return result, err
 }
 
 // The expression text.
@@ -40984,6 +42327,23 @@ func (receiver NamedExpression) SetExpressionSource(input NamedExpression) error
 func (receiver NamedExpression) ExtendedProperties() (NamedExpressionExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsNamedExpressionExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets NamedExpression.ExtendedProperties and returns up to limit items.
+func (receiver NamedExpression) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // The dialect of the expression.
@@ -43751,6 +45111,23 @@ func (receiver Package) Annotations() (PackageAnnotationCollection, error) {
 	return AsPackageAnnotationCollection(result), err
 }
 
+// AnnotationItems gets Package.Annotations and returns up to limit items.
+func (receiver Package) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // The version of the source package that this model was last synchronized to. Used to detect whether a newer
 // package version is available and to locate the baseline used for the merge during sync.
 //
@@ -44612,6 +45989,23 @@ func (receiver Partition) Annotations() (PartitionAnnotationCollection, error) {
 	return AsPartitionAnnotationCollection(result), err
 }
 
+// AnnotationItems gets Partition.Annotations and returns up to limit items.
+func (receiver Partition) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // A reference to an optional DataCoverageDefinition that provides the hint regarding the data that is covered
 // by the partition.
 //
@@ -44695,6 +46089,23 @@ func (receiver Partition) SetErrorMessage(input string) error {
 func (receiver Partition) ExtendedProperties() (PartitionExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsPartitionExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets Partition.ExtendedProperties and returns up to limit items.
+func (receiver Partition) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // Defines the method for making data available in the partition. Possible values are as follows. Import (0)
@@ -45934,6 +47345,23 @@ func (receiver Perspective) Annotations() (PerspectiveAnnotationCollection, erro
 	return AsPerspectiveAnnotationCollection(result), err
 }
 
+// AnnotationItems gets Perspective.Annotations and returns up to limit items.
+func (receiver Perspective) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // The description of the perspective, visible to developers at design time and to administrators in management
 // tools, such as SQL Server Management Studio.
 //
@@ -45959,6 +47387,23 @@ func (receiver Perspective) SetDescription(input string) error {
 func (receiver Perspective) ExtendedProperties() (PerspectiveExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsPerspectiveExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets Perspective.ExtendedProperties and returns up to limit items.
+func (receiver Perspective) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // Gets the Tabular model that contains this object.
@@ -46028,6 +47473,23 @@ func (receiver Perspective) SetParent(input MetadataObject) error {
 func (receiver Perspective) PerspectiveTables() (PerspectiveTableCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("PerspectiveTables")
 	return AsPerspectiveTableCollection(result), err
+}
+
+// PerspectiveTableItems gets Perspective.PerspectiveTables and returns up to limit items.
+func (receiver Perspective) PerspectiveTableItems(limit int) ([]PerspectiveTable, error) {
+	collection, err := receiver.PerspectiveTables()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]PerspectiveTable, len(items))
+	for index := range items {
+		result[index] = AsPerspectiveTable(items[index])
+	}
+	return result, err
 }
 
 // Creates a new, full copy of a Perspective object.
@@ -46652,6 +48114,23 @@ func (receiver PerspectiveColumn) Annotations() (PerspectiveColumnAnnotationColl
 	return AsPerspectiveColumnAnnotationCollection(result), err
 }
 
+// AnnotationItems gets PerspectiveColumn.Annotations and returns up to limit items.
+func (receiver PerspectiveColumn) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // A reference to a Column object associated with this PerspectiveColumn object.
 //
 // Value:
@@ -46688,6 +48167,23 @@ func (receiver PerspectiveColumn) SetColumn(input Column) error {
 func (receiver PerspectiveColumn) ExtendedProperties() (PerspectiveColumnExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsPerspectiveColumnExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets PerspectiveColumn.ExtendedProperties and returns up to limit items.
+func (receiver PerspectiveColumn) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // Gets the Tabular model that contains this object.
@@ -47829,6 +49325,23 @@ func (receiver PerspectiveHierarchy) Annotations() (PerspectiveHierarchyAnnotati
 	return AsPerspectiveHierarchyAnnotationCollection(result), err
 }
 
+// AnnotationItems gets PerspectiveHierarchy.Annotations and returns up to limit items.
+func (receiver PerspectiveHierarchy) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all extendedproperties in the current PerspectiveHierarchy.
 //
 // Remarks:
@@ -47842,6 +49355,23 @@ func (receiver PerspectiveHierarchy) Annotations() (PerspectiveHierarchyAnnotati
 func (receiver PerspectiveHierarchy) ExtendedProperties() (PerspectiveHierarchyExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsPerspectiveHierarchyExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets PerspectiveHierarchy.ExtendedProperties and returns up to limit items.
+func (receiver PerspectiveHierarchy) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // A reference to a Hierarchy object associated with this PerspectiveHierarchy.
@@ -48772,6 +50302,23 @@ func (receiver PerspectiveMeasure) Annotations() (PerspectiveMeasureAnnotationCo
 	return AsPerspectiveMeasureAnnotationCollection(result), err
 }
 
+// AnnotationItems gets PerspectiveMeasure.Annotations and returns up to limit items.
+func (receiver PerspectiveMeasure) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all extendedproperties in the current PerspectiveMeasure.
 //
 // Remarks:
@@ -48785,6 +50332,23 @@ func (receiver PerspectiveMeasure) Annotations() (PerspectiveMeasureAnnotationCo
 func (receiver PerspectiveMeasure) ExtendedProperties() (PerspectiveMeasureExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsPerspectiveMeasureExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets PerspectiveMeasure.ExtendedProperties and returns up to limit items.
+func (receiver PerspectiveMeasure) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // A reference to a Measure object associated with this PerspectiveMeasure.
@@ -49718,6 +51282,23 @@ func (receiver PerspectiveSet) Annotations() (PerspectiveSetAnnotationCollection
 	return AsPerspectiveSetAnnotationCollection(result), err
 }
 
+// AnnotationItems gets PerspectiveSet.Annotations and returns up to limit items.
+func (receiver PerspectiveSet) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all extendedproperties in the current PerspectiveSet.
 //
 // Value:
@@ -49728,6 +51309,23 @@ func (receiver PerspectiveSet) Annotations() (PerspectiveSetAnnotationCollection
 func (receiver PerspectiveSet) ExtendedProperties() (PerspectiveSetExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsPerspectiveSetExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets PerspectiveSet.ExtendedProperties and returns up to limit items.
+func (receiver PerspectiveSet) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // Gets the Tabular model that contains this object.
@@ -50676,6 +52274,23 @@ func (receiver PerspectiveTable) Annotations() (PerspectiveTableAnnotationCollec
 	return AsPerspectiveTableAnnotationCollection(result), err
 }
 
+// AnnotationItems gets PerspectiveTable.Annotations and returns up to limit items.
+func (receiver PerspectiveTable) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all extendedproperties in the current PerspectiveTable.
 //
 // Remarks:
@@ -50689,6 +52304,23 @@ func (receiver PerspectiveTable) Annotations() (PerspectiveTableAnnotationCollec
 func (receiver PerspectiveTable) ExtendedProperties() (PerspectiveTableExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsPerspectiveTableExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets PerspectiveTable.ExtendedProperties and returns up to limit items.
+func (receiver PerspectiveTable) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // A boolean value that indicates whether all Column, Hierarchy, and Measure objects in the Table object are
@@ -50787,6 +52419,23 @@ func (receiver PerspectiveTable) PerspectiveColumns() (PerspectiveColumnCollecti
 	return AsPerspectiveColumnCollection(result), err
 }
 
+// PerspectiveColumnItems gets PerspectiveTable.PerspectiveColumns and returns up to limit items.
+func (receiver PerspectiveTable) PerspectiveColumnItems(limit int) ([]PerspectiveColumn, error) {
+	collection, err := receiver.PerspectiveColumns()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]PerspectiveColumn, len(items))
+	for index := range items {
+		result[index] = AsPerspectiveColumn(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all perspectivehierarchies in the current PerspectiveTable.
 //
 // Value:
@@ -50799,6 +52448,23 @@ func (receiver PerspectiveTable) PerspectiveHierarchies() (PerspectiveHierarchyC
 	return AsPerspectiveHierarchyCollection(result), err
 }
 
+// PerspectiveHierarchyItems gets PerspectiveTable.PerspectiveHierarchies and returns up to limit items.
+func (receiver PerspectiveTable) PerspectiveHierarchyItems(limit int) ([]PerspectiveHierarchy, error) {
+	collection, err := receiver.PerspectiveHierarchies()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]PerspectiveHierarchy, len(items))
+	for index := range items {
+		result[index] = AsPerspectiveHierarchy(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all perspectivemeasures in the current PerspectiveTable.
 //
 // Value:
@@ -50809,6 +52475,23 @@ func (receiver PerspectiveTable) PerspectiveHierarchies() (PerspectiveHierarchyC
 func (receiver PerspectiveTable) PerspectiveMeasures() (PerspectiveMeasureCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("PerspectiveMeasures")
 	return AsPerspectiveMeasureCollection(result), err
+}
+
+// PerspectiveMeasureItems gets PerspectiveTable.PerspectiveMeasures and returns up to limit items.
+func (receiver PerspectiveTable) PerspectiveMeasureItems(limit int) ([]PerspectiveMeasure, error) {
+	collection, err := receiver.PerspectiveMeasures()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]PerspectiveMeasure, len(items))
+	for index := range items {
+		result[index] = AsPerspectiveMeasure(items[index])
+	}
+	return result, err
 }
 
 // Gets the collection object of all perspectivesets in the current PerspectiveTable.
@@ -50824,6 +52507,23 @@ func (receiver PerspectiveTable) PerspectiveMeasures() (PerspectiveMeasureCollec
 func (receiver PerspectiveTable) PerspectiveSets() (PerspectiveSetCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("PerspectiveSets")
 	return AsPerspectiveSetCollection(result), err
+}
+
+// PerspectiveSetItems gets PerspectiveTable.PerspectiveSets and returns up to limit items.
+func (receiver PerspectiveTable) PerspectiveSetItems(limit int) ([]PerspectiveSet, error) {
+	collection, err := receiver.PerspectiveSets()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]PerspectiveSet, len(items))
+	for index := range items {
+		result[index] = AsPerspectiveSet(items[index])
+	}
+	return result, err
 }
 
 // A reference to a Table object associated with this PerspectiveTable.
@@ -52092,6 +53792,23 @@ func (receiver ProviderDataSource) Annotations() (DataSourceAnnotationCollection
 	return AsDataSourceAnnotationCollection(result), err
 }
 
+// AnnotationItems gets ProviderDataSource.Annotations and returns up to limit items.
+func (receiver ProviderDataSource) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // A string used to open the connection to the data source.
 //
 // Value:
@@ -52128,6 +53845,23 @@ func (receiver ProviderDataSource) SetDescription(input string) error {
 func (receiver ProviderDataSource) ExtendedProperties() (DataSourceExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsDataSourceExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets ProviderDataSource.ExtendedProperties and returns up to limit items.
+func (receiver ProviderDataSource) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // Determines how credentials are obtained for an impersonated connection to a data source during data import
@@ -52436,6 +54170,23 @@ func (receiver QueryGroup) Snapshot() (QueryGroup, error) {
 func (receiver QueryGroup) Annotations() (QueryGroupAnnotationCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("Annotations")
 	return AsQueryGroupAnnotationCollection(result), err
+}
+
+// AnnotationItems gets QueryGroup.Annotations and returns up to limit items.
+func (receiver QueryGroup) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
 }
 
 // The description of the query-group, visible to developers at design time and to administrators in management
@@ -53249,6 +55000,23 @@ func (receiver RefreshPolicy) Annotations() (RefreshPolicyAnnotationCollection, 
 	return AsRefreshPolicyAnnotationCollection(result), err
 }
 
+// AnnotationItems gets RefreshPolicy.Annotations and returns up to limit items.
+func (receiver RefreshPolicy) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all extendedproperties in the current RefreshPolicy.
 //
 // Value:
@@ -53259,6 +55027,23 @@ func (receiver RefreshPolicy) Annotations() (RefreshPolicyAnnotationCollection, 
 func (receiver RefreshPolicy) ExtendedProperties() (RefreshPolicyExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsRefreshPolicyExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets RefreshPolicy.ExtendedProperties and returns up to limit items.
+func (receiver RefreshPolicy) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // Defines the mode of a refresh policy applied during incremental refresh.
@@ -54062,6 +55847,23 @@ func (receiver RelatedColumnDetails) GroupByColumns() (GroupByColumnCollection, 
 	return AsGroupByColumnCollection(result), err
 }
 
+// GroupByColumnItems gets RelatedColumnDetails.GroupByColumns and returns up to limit items.
+func (receiver RelatedColumnDetails) GroupByColumnItems(limit int) ([]GroupByColumn, error) {
+	collection, err := receiver.GroupByColumns()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]GroupByColumn, len(items))
+	for index := range items {
+		result[index] = AsGroupByColumn(items[index])
+	}
+	return result, err
+}
+
 // Gets the Tabular model that contains this object.
 //
 // Value:
@@ -54317,6 +56119,23 @@ func (receiver Relationship) Annotations() (RelationshipAnnotationCollection, er
 	return AsRelationshipAnnotationCollection(result), err
 }
 
+// AnnotationItems gets Relationship.Annotations and returns up to limit items.
+func (receiver Relationship) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all changedproperties in the current Relationship.
 //
 // Remarks:
@@ -54330,6 +56149,23 @@ func (receiver Relationship) Annotations() (RelationshipAnnotationCollection, er
 func (receiver Relationship) ChangedProperties() (RelationshipChangedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ChangedProperties")
 	return AsRelationshipChangedPropertyCollection(result), err
+}
+
+// ChangedPropertyItems gets Relationship.ChangedProperties and returns up to limit items.
+func (receiver Relationship) ChangedPropertyItems(limit int) ([]ChangedProperty, error) {
+	collection, err := receiver.ChangedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ChangedProperty, len(items))
+	for index := range items {
+		result[index] = AsChangedProperty(items[index])
+	}
+	return result, err
 }
 
 // Indicates how relationships influence filtering of data. The enumeration defines the possible behaviors.
@@ -54360,6 +56196,23 @@ func (receiver Relationship) SetCrossFilteringBehavior(input CrossFilteringBehav
 func (receiver Relationship) ExtendedProperties() (RelationshipExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsRelationshipExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets Relationship.ExtendedProperties and returns up to limit items.
+func (receiver Relationship) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // Gets the starting table in a directional table relationship.
@@ -57528,6 +59381,23 @@ func (receiver RowNumberColumn) Annotations() (ColumnAnnotationCollection, error
 	return AsColumnAnnotationCollection(result), err
 }
 
+// AnnotationItems gets RowNumberColumn.Annotations and returns up to limit items.
+func (receiver RowNumberColumn) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // A reference to an AttributeHierarchy object associated with this ColumnOrigin object.
 //
 // Value:
@@ -57564,6 +59434,23 @@ func (receiver RowNumberColumn) SetAttributeHierarchy(input AttributeHierarchy) 
 func (receiver RowNumberColumn) ChangedProperties() (ColumnChangedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ChangedProperties")
 	return AsColumnChangedPropertyCollection(result), err
+}
+
+// ChangedPropertyItems gets RowNumberColumn.ChangedProperties and returns up to limit items.
+func (receiver RowNumberColumn) ChangedPropertyItems(limit int) ([]ChangedProperty, error) {
+	collection, err := receiver.ChangedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ChangedProperty, len(items))
+	for index := range items {
+		result[index] = AsChangedProperty(items[index])
+	}
+	return result, err
 }
 
 // Specifies the type of data contained in the column so that you can add custom behaviors based on column
@@ -57671,6 +59558,23 @@ func (receiver RowNumberColumn) SetErrorMessage(input string) error {
 func (receiver RowNumberColumn) ExtendedProperties() (ColumnExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsColumnExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets RowNumberColumn.ExtendedProperties and returns up to limit items.
+func (receiver RowNumberColumn) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // A string that specifies the format of the column contents.
@@ -58150,6 +60054,23 @@ func (receiver RowNumberColumn) SetType(input ColumnType) error {
 func (receiver RowNumberColumn) Variations() (VariationCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("Variations")
 	return AsVariationCollection(result), err
+}
+
+// VariationItems gets RowNumberColumn.Variations and returns up to limit items.
+func (receiver RowNumberColumn) VariationItems(limit int) ([]Variation, error) {
+	collection, err := receiver.Variations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Variation, len(items))
+	for index := range items {
+		result[index] = AsVariation(items[index])
+	}
+	return result, err
 }
 
 // Creates a new, full copy of a Column object.
@@ -63647,6 +65568,23 @@ func (receiver Set) Annotations() (SetAnnotationCollection, error) {
 	return AsSetAnnotationCollection(result), err
 }
 
+// AnnotationItems gets Set.Annotations and returns up to limit items.
+func (receiver Set) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // The description of the set
 //
 // Value:
@@ -63703,6 +65641,23 @@ func (receiver Set) SetExpression(input string) error {
 func (receiver Set) ExtendedProperties() (SetExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsSetExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets Set.ExtendedProperties and returns up to limit items.
+func (receiver Set) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // Indicates whether the set is static or dynamic
@@ -64780,6 +66735,23 @@ func (receiver SingleColumnRelationship) Annotations() (RelationshipAnnotationCo
 	return AsRelationshipAnnotationCollection(result), err
 }
 
+// AnnotationItems gets SingleColumnRelationship.Annotations and returns up to limit items.
+func (receiver SingleColumnRelationship) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all changedproperties in the current Relationship.
 //
 // Remarks:
@@ -64793,6 +66765,23 @@ func (receiver SingleColumnRelationship) Annotations() (RelationshipAnnotationCo
 func (receiver SingleColumnRelationship) ChangedProperties() (RelationshipChangedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ChangedProperties")
 	return AsRelationshipChangedPropertyCollection(result), err
+}
+
+// ChangedPropertyItems gets SingleColumnRelationship.ChangedProperties and returns up to limit items.
+func (receiver SingleColumnRelationship) ChangedPropertyItems(limit int) ([]ChangedProperty, error) {
+	collection, err := receiver.ChangedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ChangedProperty, len(items))
+	for index := range items {
+		result[index] = AsChangedProperty(items[index])
+	}
+	return result, err
 }
 
 // Indicates how relationships influence filtering of data. The enumeration defines the possible behaviors.
@@ -64823,6 +66812,23 @@ func (receiver SingleColumnRelationship) SetCrossFilteringBehavior(input CrossFi
 func (receiver SingleColumnRelationship) ExtendedProperties() (RelationshipExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsRelationshipExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets SingleColumnRelationship.ExtendedProperties and returns up to limit items.
+func (receiver SingleColumnRelationship) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // Indicates whether the "From" end of the relationship has a cardinality of One (1) or Many (2).
@@ -65767,6 +67773,23 @@ func (receiver StructuredDataSource) Annotations() (DataSourceAnnotationCollecti
 	return AsDataSourceAnnotationCollection(result), err
 }
 
+// AnnotationItems gets StructuredDataSource.Annotations and returns up to limit items.
+func (receiver StructuredDataSource) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Connection address and protocol.
 //
 // Value:
@@ -65849,6 +67872,23 @@ func (receiver StructuredDataSource) SetDescription(input string) error {
 func (receiver StructuredDataSource) ExtendedProperties() (DataSourceExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsDataSourceExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets StructuredDataSource.ExtendedProperties and returns up to limit items.
+func (receiver StructuredDataSource) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // The maximum number of connections to be opened concurrently to the data source.
@@ -66370,6 +68410,23 @@ func (receiver Table) Annotations() (TableAnnotationCollection, error) {
 	return AsTableAnnotationCollection(result), err
 }
 
+// AnnotationItems gets Table.Annotations and returns up to limit items.
+func (receiver Table) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // CalculationGroup reference.
 //
 // Remarks:
@@ -66414,6 +68471,23 @@ func (receiver Table) Calendars() (CalendarCollection, error) {
 	return AsCalendarCollection(result), err
 }
 
+// CalendarItems gets Table.Calendars and returns up to limit items.
+func (receiver Table) CalendarItems(limit int) ([]Calendar, error) {
+	collection, err := receiver.Calendars()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Calendar, len(items))
+	for index := range items {
+		result[index] = AsCalendar(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all changedproperties in the current Table.
 //
 // Remarks:
@@ -66429,6 +68503,23 @@ func (receiver Table) ChangedProperties() (TableChangedPropertyCollection, error
 	return AsTableChangedPropertyCollection(result), err
 }
 
+// ChangedPropertyItems gets Table.ChangedProperties and returns up to limit items.
+func (receiver Table) ChangedPropertyItems(limit int) ([]ChangedProperty, error) {
+	collection, err := receiver.ChangedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ChangedProperty, len(items))
+	for index := range items {
+		result[index] = AsChangedProperty(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all columns in the current Table.
 //
 // Value:
@@ -66439,6 +68530,23 @@ func (receiver Table) ChangedProperties() (TableChangedPropertyCollection, error
 func (receiver Table) Columns() (ColumnCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("Columns")
 	return AsColumnCollection(result), err
+}
+
+// ColumnItems gets Table.Columns and returns up to limit items.
+func (receiver Table) ColumnItems(limit int) ([]Column, error) {
+	collection, err := receiver.Columns()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Column, len(items))
+	for index := range items {
+		result[index] = AsColumn(items[index])
+	}
+	return result, err
 }
 
 // Specifies the type of Table so that you can customize application behavior based on the type of data in the
@@ -66558,6 +68666,23 @@ func (receiver Table) ExcludedArtifacts() (TableExcludedArtifactCollection, erro
 	return AsTableExcludedArtifactCollection(result), err
 }
 
+// ExcludedArtifactItems gets Table.ExcludedArtifacts and returns up to limit items.
+func (receiver Table) ExcludedArtifactItems(limit int) ([]ExcludedArtifact, error) {
+	collection, err := receiver.ExcludedArtifacts()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExcludedArtifact, len(items))
+	for index := range items {
+		result[index] = AsExcludedArtifact(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all extendedproperties in the current Table.
 //
 // Remarks:
@@ -66573,6 +68698,23 @@ func (receiver Table) ExtendedProperties() (TableExtendedPropertyCollection, err
 	return AsTableExtendedPropertyCollection(result), err
 }
 
+// ExtendedPropertyItems gets Table.ExtendedProperties and returns up to limit items.
+func (receiver Table) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all hierarchies in the current Table.
 //
 // Value:
@@ -66583,6 +68725,23 @@ func (receiver Table) ExtendedProperties() (TableExtendedPropertyCollection, err
 func (receiver Table) Hierarchies() (HierarchyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("Hierarchies")
 	return AsHierarchyCollection(result), err
+}
+
+// HierarchyItems gets Table.Hierarchies and returns up to limit items.
+func (receiver Table) HierarchyItems(limit int) ([]Hierarchy, error) {
+	collection, err := receiver.Hierarchies()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Hierarchy, len(items))
+	for index := range items {
+		result[index] = AsHierarchy(items[index])
+	}
+	return result, err
 }
 
 // A boolean value that indicates whether the table is treated as hidden by client visualization tools. True if
@@ -66639,6 +68798,23 @@ func (receiver Table) SetLineageTag(input string) error {
 func (receiver Table) Measures() (MeasureCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("Measures")
 	return AsMeasureCollection(result), err
+}
+
+// MeasureItems gets Table.Measures and returns up to limit items.
+func (receiver Table) MeasureItems(limit int) ([]Measure, error) {
+	collection, err := receiver.Measures()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Measure, len(items))
+	for index := range items {
+		result[index] = AsMeasure(items[index])
+	}
+	return result, err
 }
 
 // Gets the Tabular model that contains this object.
@@ -66710,6 +68886,23 @@ func (receiver Table) Partitions() (PartitionCollection, error) {
 	return AsPartitionCollection(result), err
 }
 
+// PartitionItems gets Table.Partitions and returns up to limit items.
+func (receiver Table) PartitionItems(limit int) ([]Partition, error) {
+	collection, err := receiver.Partitions()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Partition, len(items))
+	for index := range items {
+		result[index] = AsPartition(items[index])
+	}
+	return result, err
+}
+
 // Refresh policy for the table.
 //
 // Remarks:
@@ -66752,6 +68945,23 @@ func (receiver Table) SetRefreshPolicy(input RefreshPolicy) error {
 func (receiver Table) Sets() (SetCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("Sets")
 	return AsSetCollection(result), err
+}
+
+// SetItems gets Table.Sets and returns up to limit items.
+func (receiver Table) SetItems(limit int) ([]Set, error) {
+	collection, err := receiver.Sets()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Set, len(items))
+	for index := range items {
+		result[index] = AsSet(items[index])
+	}
+	return result, err
 }
 
 // A boolean value that indicates a difference between a local and server version. If True, the Table is only
@@ -68195,6 +70405,23 @@ func (receiver TablePermission) Annotations() (TablePermissionAnnotationCollecti
 	return AsTablePermissionAnnotationCollection(result), err
 }
 
+// AnnotationItems gets TablePermission.Annotations and returns up to limit items.
+func (receiver TablePermission) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all columnpermissions in the current TablePermission.
 //
 // Remarks:
@@ -68208,6 +70435,23 @@ func (receiver TablePermission) Annotations() (TablePermissionAnnotationCollecti
 func (receiver TablePermission) ColumnPermissions() (ColumnPermissionCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ColumnPermissions")
 	return AsColumnPermissionCollection(result), err
+}
+
+// ColumnPermissionItems gets TablePermission.ColumnPermissions and returns up to limit items.
+func (receiver TablePermission) ColumnPermissionItems(limit int) ([]ColumnPermission, error) {
+	collection, err := receiver.ColumnPermissions()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ColumnPermission, len(items))
+	for index := range items {
+		result[index] = AsColumnPermission(items[index])
+	}
+	return result, err
 }
 
 // A string that explains the error state associated with the current object. It is set by the engine only when
@@ -68235,6 +70479,23 @@ func (receiver TablePermission) SetErrorMessage(input string) error {
 func (receiver TablePermission) ExtendedProperties() (TablePermissionExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsTablePermissionExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets TablePermission.ExtendedProperties and returns up to limit items.
+func (receiver TablePermission) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // The DAX expression that filters the rows in the table when this security role is in effect.
@@ -75118,6 +77379,23 @@ func (receiver Variation) Annotations() (VariationAnnotationCollection, error) {
 	return AsVariationAnnotationCollection(result), err
 }
 
+// AnnotationItems gets Variation.Annotations and returns up to limit items.
+func (receiver Variation) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Missing comment
 //
 // Value:
@@ -75197,6 +77475,23 @@ func (receiver Variation) SetDescription(input string) error {
 func (receiver Variation) ExtendedProperties() (VariationExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsVariationExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets Variation.ExtendedProperties and returns up to limit items.
+func (receiver Variation) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // If true, the Variation is the Default one for the Column.
@@ -76158,6 +78453,23 @@ func (receiver WindowsModelRoleMember) Annotations() (ModelRoleMemberAnnotationC
 	return AsModelRoleMemberAnnotationCollection(result), err
 }
 
+// AnnotationItems gets WindowsModelRoleMember.Annotations and returns up to limit items.
+func (receiver WindowsModelRoleMember) AnnotationItems(limit int) ([]Annotation, error) {
+	collection, err := receiver.Annotations()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Annotation, len(items))
+	for index := range items {
+		result[index] = AsAnnotation(items[index])
+	}
+	return result, err
+}
+
 // Gets the collection object of all extendedproperties in the current ModelRoleMember.
 //
 // Remarks:
@@ -76171,6 +78483,23 @@ func (receiver WindowsModelRoleMember) Annotations() (ModelRoleMemberAnnotationC
 func (receiver WindowsModelRoleMember) ExtendedProperties() (ModelRoleMemberExtendedPropertyCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("ExtendedProperties")
 	return AsModelRoleMemberExtendedPropertyCollection(result), err
+}
+
+// ExtendedPropertyItems gets WindowsModelRoleMember.ExtendedProperties and returns up to limit items.
+func (receiver WindowsModelRoleMember) ExtendedPropertyItems(limit int) ([]ExtendedProperty, error) {
+	collection, err := receiver.ExtendedProperties()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]ExtendedProperty, len(items))
+	for index := range items {
+		result[index] = AsExtendedProperty(items[index])
+	}
+	return result, err
 }
 
 // A reference to a Member object associated with this RoleMembership.

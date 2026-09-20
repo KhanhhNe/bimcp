@@ -218,6 +218,8 @@ internal sealed class GoGenerator
                 $"receiver.objectRef.Value.GetValue({Quote(property.Name)})",
                 $"receiver.objectRef.Value.GetAny({Quote(property.Name)})");
             GeneratedMemberCount++;
+            reservedNames.Add(getterName);
+            GenerateCollectionItemsHelper(owner, property, getterName, reservedNames);
         }
         if (property.CanWrite && property.SetMethod is { IsStatic: false })
         {
@@ -230,6 +232,57 @@ internal sealed class GoGenerator
             GeneratedMemberCount++;
         }
     }
+
+    private void GenerateCollectionItemsHelper(
+        string owner,
+        PropertyInfo property,
+        string getterName,
+        HashSet<string> reservedNames)
+    {
+        var itemType = CollectionItemType(property.PropertyType);
+        if (!_goNames.ContainsKey(property.PropertyType) ||
+            itemType is null ||
+            !_goNames.TryGetValue(itemType, out var itemName))
+        {
+            return;
+        }
+
+        var helperName = itemName + "Items";
+        if (reservedNames.Contains(helperName))
+        {
+            helperName = Identifier(property.Name) + "Items";
+        }
+        for (var suffix = 2; !reservedNames.Add(helperName); suffix++)
+        {
+            helperName = Identifier(property.Name) + "Items" + suffix;
+        }
+
+        Comment($"{helperName} gets {owner}.{property.Name} and returns up to limit items.", "");
+        Line($"func (receiver {owner}) {helperName}(limit int) ([]{itemName}, error) {{");
+        Line($"\tcollection, err := receiver.{getterName}()");
+        Line("\tif err != nil {");
+        Line("\t\treturn nil, err");
+        Line("\t}");
+        Line("\tif collection.TOMValue().Handle == 0 {");
+        Line("\t\treturn nil, nil");
+        Line("\t}");
+        Line("\titems, err := collection.Items(limit)");
+        Line($"\tresult := make([]{itemName}, len(items))");
+        Line("\tfor index := range items {");
+        Line($"\t\tresult[index] = As{itemName}(items[index])");
+        Line("\t}");
+        Line("\treturn result, err");
+        Line("}");
+        Line();
+        GeneratedMemberCount++;
+    }
+
+    private static Type? CollectionItemType(Type type) =>
+        type.GetInterfaces()
+            .Where(candidate => candidate.IsGenericType &&
+                                candidate.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            .Select(candidate => candidate.GetGenericArguments()[0])
+            .FirstOrDefault();
 
     private void GenerateInstanceField(string owner, FieldInfo field, HashSet<string> reservedNames)
     {

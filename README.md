@@ -64,9 +64,13 @@ Generated wrappers are written to `tom\generated.go`:
 typedModel := tom.AsModel(model)
 typedModel, err = typedModel.Snapshot()
 name := typedModel.Name
-tables, err := typedModel.Tables()
+tables, err := typedModel.TableItems(0)
 err = typedModel.SaveChanges()
 ```
+
+Readable collection properties also get typed `<Item>Items(limit)` helpers, such as
+`Model.TableItems`, `Table.ColumnItems`, and `Table.MeasureItems`. A positive limit stops
+enumeration after that many items; zero returns the full collection.
 
 ## Development
 
