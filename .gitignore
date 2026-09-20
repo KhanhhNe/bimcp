@@ -1,0 +1,9 @@
+bin/
+obj/
+tom/bin/
+tom/obj/
+*.exe
+*.dll
+*.pdb
+*.lib
+*.exp
