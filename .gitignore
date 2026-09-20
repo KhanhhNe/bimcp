@@ -7,3 +7,6 @@ tom/obj/
 *.pdb
 *.lib
 *.exp
+
+test/*
+!test/.gitkeep
