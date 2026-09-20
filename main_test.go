@@ -41,3 +41,84 @@ func TestEmitTableUsesOutputPath(t *testing.T) {
 		t.Fatalf("stat financials output directory: %v", err)
 	}
 }
+
+func TestAssociateTablesLinksVariationHierarchyToSourceColumn(t *testing.T) {
+	tables := []tableMetadata{
+		{
+			name: "financials",
+			columns: []columnMetadata{{
+				name: "Date",
+				variations: []variationMetadata{{
+					name:             "Variation",
+					isDefault:        true,
+					defaultHierarchy: &hierarchyReference{table: "LocalDateTable_8aa93495-4c36-404c-b2a5-723254079f25", hierarchy: "Date Hierarchy"},
+				}},
+			}},
+		},
+		{name: "LocalDateTable_8aa93495-4c36-404c-b2a5-723254079f25", isHidden: true},
+	}
+
+	associated := associateTables(tables)
+
+	got := associated[1].associatedColumns
+	want := columnReference{table: "financials", column: "Date"}
+	if len(got) != 1 || !sameColumnReference(got[0], want) {
+		t.Fatalf("associated columns = %#v, want %#v", got, want)
+	}
+	if role := associated[1].tomRole(); role != "hidden TOM table" {
+		t.Fatalf("tomRole() = %q, want hidden TOM table", role)
+	}
+}
+
+func TestAssociateTablesLinksCalculatedTableExpressionToSourceColumn(t *testing.T) {
+	tables := []tableMetadata{
+		{name: "financials", columns: []columnMetadata{{name: "Date"}}},
+		{
+			name:                  "LocalDateTable_8aa93495-4c36-404c-b2a5-723254079f25",
+			isHidden:              true,
+			showAsVariationsOnly:  true,
+			calculatedExpressions: []string{"CALENDAR(MIN('financials'[Date]), MAX('financials'[Date]))"},
+		},
+	}
+
+	associated := associateTables(tables)
+
+	got := associated[1].associatedColumns
+	want := columnReference{table: "financials", column: "Date"}
+	if len(got) != 1 || !sameColumnReference(got[0], want) {
+		t.Fatalf("associated columns = %#v, want %#v", got, want)
+	}
+}
+
+func TestDAXColumnReferencesHandlesEscapedTableNamesAndDuplicates(t *testing.T) {
+	references := daxColumnReferences("MIN('Bob''s Sales'[Order Date]) + MAX('Bob''s Sales'[Order Date]) + MAX(financials[Close]]])")
+
+	want := []columnReference{
+		{table: "Bob's Sales", column: "Order Date"},
+		{table: "financials", column: "Close]"},
+	}
+	if len(references) != len(want) {
+		t.Fatalf("daxColumnReferences() = %#v, want %#v", references, want)
+	}
+	for index := range want {
+		if !sameColumnReference(references[index], want[index]) {
+			t.Fatalf("daxColumnReferences() = %#v, want %#v", references, want)
+		}
+	}
+}
+
+func TestAssociateTablesDoesNotReverseOrdinaryCalculatedTableDependencies(t *testing.T) {
+	tables := []tableMetadata{
+		{name: "financials", columns: []columnMetadata{{name: "Date"}}},
+		{
+			name:                  "Summary",
+			calculatedExpressions: []string{"SUMMARIZE('financials', 'financials'[Date])"},
+		},
+	}
+
+	associated := associateTables(tables)
+
+	if got := associated[1].associatedColumns; len(got) != 0 {
+		t.Fatalf("associated columns = %#v, want none", got)
+	}
+}

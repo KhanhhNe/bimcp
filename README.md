@@ -20,7 +20,11 @@ go run .
 ```
 
 The example discovers the open Power BI Desktop Analysis Services workspace, connects to it,
-reads `Server.Databases[0].Model.Tables`, and prints each table and its column count.
+reads `Server.Databases[0].Model.Tables`, and prints each table with its TOM visibility, columns,
+measures, attribute hierarchies, and variations. Hidden/private Power BI-generated tables are
+reported as non-main TOM tables. Date hierarchy variations, their relationships, and calculated
+table expressions are used to associate tables such as `LocalDateTable_*` with the source column
+that uses them.
 Use `--output-path` (or `-o`) to choose where table folders are created:
 
 ```powershell
