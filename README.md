@@ -20,7 +20,9 @@ go run .
 ```
 
 The build caches fingerprints for the native bridge and Go wrapper generator under `tom\obj`.
-Unchanged stages are skipped on subsequent runs. Use `.\build.ps1 -Force` to rebuild both stages.
+Unchanged stages are skipped on subsequent runs. Dependency restore is also skipped after
+source-only changes, and the .NET MSBuild server is enabled for repeated CLI builds. Use
+`.\build.ps1 -Force` to restore dependencies and rebuild both stages.
 
 The example discovers the open Power BI Desktop Analysis Services workspace, connects to it,
 reads `Server.Databases[0].Model.Tables`, and prints each table with its TOM visibility, columns,
