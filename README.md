@@ -23,7 +23,7 @@ Power BI Desktop must be open with a report loaded.
 
 ```powershell
 .\build.ps1
-go run .
+go run . --output-path .\test
 ```
 
 The build caches fingerprints for the native bridge and Go wrapper generator under `tom\obj`.
@@ -32,29 +32,10 @@ source-only changes, and the .NET MSBuild server is enabled for repeated CLI bui
 `.\build.ps1 -Force` to restore dependencies and rebuild both stages.
 
 The example discovers the open Power BI Desktop Analysis Services workspace, connects to it,
-reads `Server.Databases[0].Model.Tables`, and prints each table with its TOM visibility, columns,
-measures, attribute hierarchies, and variations. Hidden/private Power BI-generated tables are
-reported as non-main TOM tables. Date hierarchy variations, their relationships, and calculated
-table expressions are used to associate tables such as `LocalDateTable_*` with the source column
-that uses them.
-Use `--output-path` (or `-o`) to choose where table folders are created:
-
-```powershell
-go run . --output-path .\test
-```
-
-To test whether independent TOM requests overlap, run:
-
-```powershell
-go run . --concurrency-test
-```
-
-This runs sequential and synchronized-goroutine comparisons for distinct and shared column
-snapshots, scalar property reads, table snapshots, collection enumeration, and a mixed metadata
-workload. By default it tests 2, 4, 8, 16, and 32 workers with 1,000 calls per worker. Use
-`--concurrency-workers` and `--concurrency-iterations` to change the matrix, or
-`--concurrency-details` to include per-worker start/end offsets. A speedup close to 1x as workers
-increase indicates that TOM or Power BI is processing that operation one call at a time.
+reads `Server.Databases[0].Model.Tables`, and prints the tables visible in Power BI clients. For
+each visible table it prints the visible columns and their data types, plus visible measures and
+their DAX expressions. It creates one folder per table under `--output-path`. The process keeps
+watching the model and prints newly added visible tables.
 
 The default DLL path is `tom\bin\tombridge.dll`. Set `TOM_BRIDGE_DLL` to load another build.
 
