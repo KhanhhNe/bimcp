@@ -1,9 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -13,6 +15,11 @@ import (
 const modelPollInterval = time.Second
 
 func main() {
+	var outputPath string
+	flag.StringVar(&outputPath, "output-path", ".", "directory where table folders are created")
+	flag.StringVar(&outputPath, "o", ".", "directory where table folders are created")
+	flag.Parse()
+
 	client, err := tom.Open("")
 	if err != nil {
 		log.Fatal(err)
@@ -50,7 +57,7 @@ func main() {
 	}
 
 	for _, table := range tables {
-		if err := emitTable(table); err != nil {
+		if err := emitTable(outputPath, table); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -66,7 +73,7 @@ func main() {
 			continue
 		}
 		for _, table := range newTables(known, tables) {
-			if err := emitTable(table); err != nil {
+			if err := emitTable(outputPath, table); err != nil {
 				log.Printf("detect table %q: %v", table.name, err)
 			}
 		}
@@ -145,8 +152,9 @@ func readTOMTables(model tom.Model) ([]tableMetadata, error) {
 	return result, nil
 }
 
-func emitTable(table tableMetadata) error {
-	if err := os.MkdirAll(table.name, 0755); err != nil {
+func emitTable(outputPath string, table tableMetadata) error {
+	tablePath := filepath.Join(outputPath, table.name)
+	if err := os.MkdirAll(tablePath, 0755); err != nil {
 		return fmt.Errorf("create folder for table %q: %w", table.name, err)
 	}
 	fmt.Printf("Table: %s (%d columns, %d measures)\n", table.name, len(table.columns), len(table.measures))

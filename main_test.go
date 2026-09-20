@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
+)
 
 func TestNewTablesDetectsTablesAddedAfterStartup(t *testing.T) {
 	known := tableNames([]tableMetadata{{name: "Existing"}})
@@ -23,5 +27,17 @@ func TestNewTablesMatchesNamesCaseInsensitively(t *testing.T) {
 
 	if len(added) != 0 {
 		t.Fatalf("newTables() = %#v, want no added tables", added)
+	}
+}
+
+func TestEmitTableUsesOutputPath(t *testing.T) {
+	outputPath := t.TempDir()
+
+	if err := emitTable(outputPath, tableMetadata{name: "financials"}); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := os.Stat(filepath.Join(outputPath, "financials")); err != nil {
+		t.Fatalf("stat financials output directory: %v", err)
 	}
 }
