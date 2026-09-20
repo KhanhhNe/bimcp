@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"sync"
 	"syscall"
 	"unsafe"
 )
@@ -18,7 +17,6 @@ import (
 type Client struct {
 	call syscall.Proc
 	free syscall.Proc
-	mu   sync.Mutex
 }
 
 // Value identifies a managed TOM object held by the native bridge.
@@ -128,9 +126,6 @@ func (c *Client) CallAny(command map[string]any) (any, error) {
 }
 
 func (c *Client) callRaw(command map[string]any) (json.RawMessage, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
 	request, err := json.Marshal(command)
 	if err != nil {
 		return nil, err

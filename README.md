@@ -43,6 +43,19 @@ Use `--output-path` (or `-o`) to choose where table folders are created:
 go run . --output-path .\test
 ```
 
+To test whether independent TOM requests overlap, run:
+
+```powershell
+go run . --concurrency-test
+```
+
+This warms every column, fetches each column's complete scalar snapshot repeatedly first
+sequentially and then from synchronized goroutines, and exits. The default is 1,000 snapshots per
+column; use `--concurrency-iterations` to change it. The report includes sequential and concurrent
+wall time, the speedup, peak Go calls in flight, and per-column concurrent start/end offsets. A
+concurrent wall time close to the sequential wall time indicates that TOM or Power BI is processing
+the requests one by one.
+
 The default DLL path is `tom\bin\tombridge.dll`. Set `TOM_BRIDGE_DLL` to load another build.
 
 Generated wrappers are written to `tom\generated.go`:
