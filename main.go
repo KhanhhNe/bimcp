@@ -143,22 +143,11 @@ func readTOMTables(model tom.Model) ([]tableMetadata, error) {
 	result := make([]tableMetadata, 0, len(tableItems))
 	for _, item := range tableItems {
 		table := tom.AsTable(item)
-		name, err := table.Name()
+		table, err = table.Snapshot()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("read table properties: %w", err)
 		}
-		isHidden, err := table.IsHidden()
-		if err != nil {
-			return nil, fmt.Errorf("get hidden state for table %q: %w", name, err)
-		}
-		isPrivate, err := table.IsPrivate()
-		if err != nil {
-			return nil, fmt.Errorf("get private state for table %q: %w", name, err)
-		}
-		showAsVariationsOnly, err := table.ShowAsVariationsOnly()
-		if err != nil {
-			return nil, fmt.Errorf("get variation-only state for table %q: %w", name, err)
-		}
+		name := table.Name
 		columns, err := table.Columns()
 		if err != nil {
 			return nil, fmt.Errorf("get columns for table %q: %w", name, err)
@@ -178,16 +167,17 @@ func readTOMTables(model tom.Model) ([]tableMetadata, error) {
 
 		metadata := tableMetadata{
 			name:                 name,
-			isHidden:             isHidden,
-			isPrivate:            isPrivate,
-			showAsVariationsOnly: showAsVariationsOnly,
+			isHidden:             table.IsHidden,
+			isPrivate:            table.IsPrivate,
+			showAsVariationsOnly: table.ShowAsVariationsOnly,
 		}
 		for _, item := range columnItems {
 			column := tom.AsColumn(item)
-			columnName, err := column.Name()
+			column, err = column.Snapshot()
 			if err != nil {
-				return nil, fmt.Errorf("get column name for table %q: %w", name, err)
+				return nil, fmt.Errorf("read column properties for table %q: %w", name, err)
 			}
+			columnName := column.Name
 			columnMetadata, err := readTOMColumn(name, columnName, column)
 			if err != nil {
 				return nil, err
@@ -195,11 +185,11 @@ func readTOMTables(model tom.Model) ([]tableMetadata, error) {
 			metadata.columns = append(metadata.columns, columnMetadata)
 		}
 		for _, item := range measureItems {
-			measureName, err := tom.AsMeasure(item).Name()
+			measure, err := tom.AsMeasure(item).Snapshot()
 			if err != nil {
-				return nil, fmt.Errorf("get measure name for table %q: %w", name, err)
+				return nil, fmt.Errorf("read measure properties for table %q: %w", name, err)
 			}
-			metadata.measures = append(metadata.measures, measureName)
+			metadata.measures = append(metadata.measures, measure.Name)
 		}
 		metadata.calculatedExpressions, err = readCalculatedExpressions(name, table)
 		if err != nil {
@@ -211,23 +201,18 @@ func readTOMTables(model tom.Model) ([]tableMetadata, error) {
 }
 
 func readTOMColumn(tableName, columnName string, column tom.Column) (columnMetadata, error) {
-	metadata := columnMetadata{name: columnName}
-	isAvailableInMDX, err := column.IsAvailableInMDX()
-	if err != nil {
-		return metadata, fmt.Errorf("get MDX availability for column %q.%q: %w", tableName, columnName, err)
-	}
-	metadata.isAvailableInMDX = isAvailableInMDX
+	metadata := columnMetadata{name: columnName, isAvailableInMDX: column.IsAvailableInMDX}
 
 	attributeHierarchy, err := column.AttributeHierarchy()
 	if err != nil {
 		return metadata, fmt.Errorf("get attribute hierarchy for column %q.%q: %w", tableName, columnName, err)
 	}
 	if attributeHierarchy.TOMValue().Handle != 0 {
-		state, err := attributeHierarchy.State()
+		attributeHierarchy, err = attributeHierarchy.Snapshot()
 		if err != nil {
-			return metadata, fmt.Errorf("get attribute hierarchy state for column %q.%q: %w", tableName, columnName, err)
+			return metadata, fmt.Errorf("read attribute hierarchy properties for column %q.%q: %w", tableName, columnName, err)
 		}
-		metadata.attributeHierarchyState = string(state)
+		metadata.attributeHierarchyState = string(attributeHierarchy.State)
 	}
 
 	variations, err := column.Variations()
@@ -252,15 +237,12 @@ func readTOMColumn(tableName, columnName string, column tom.Column) (columnMetad
 }
 
 func readTOMVariation(tableName, columnName string, variation tom.Variation) (variationMetadata, error) {
-	name, err := variation.Name()
+	variation, err := variation.Snapshot()
 	if err != nil {
-		return variationMetadata{}, fmt.Errorf("get variation name for column %q.%q: %w", tableName, columnName, err)
+		return variationMetadata{}, fmt.Errorf("read variation properties for column %q.%q: %w", tableName, columnName, err)
 	}
-	isDefault, err := variation.IsDefault()
-	if err != nil {
-		return variationMetadata{}, fmt.Errorf("get variation state for column %q.%q: %w", tableName, columnName, err)
-	}
-	metadata := variationMetadata{name: name, isDefault: isDefault}
+	name := variation.Name
+	metadata := variationMetadata{name: name, isDefault: variation.IsDefault}
 
 	defaultColumn, err := variation.DefaultColumn()
 	if err != nil {
@@ -279,19 +261,20 @@ func readTOMVariation(tableName, columnName string, variation tom.Variation) (va
 		return metadata, fmt.Errorf("get default hierarchy for variation %q on %q.%q: %w", name, tableName, columnName, err)
 	}
 	if defaultHierarchy.TOMValue().Handle != 0 {
-		hierarchyName, err := defaultHierarchy.Name()
+		defaultHierarchy, err = defaultHierarchy.Snapshot()
 		if err != nil {
-			return metadata, fmt.Errorf("get default hierarchy name for variation %q on %q.%q: %w", name, tableName, columnName, err)
+			return metadata, fmt.Errorf("read default hierarchy properties for variation %q on %q.%q: %w", name, tableName, columnName, err)
 		}
+		hierarchyName := defaultHierarchy.Name
 		hierarchyTable, err := defaultHierarchy.Table()
 		if err != nil {
 			return metadata, fmt.Errorf("get default hierarchy table for variation %q on %q.%q: %w", name, tableName, columnName, err)
 		}
-		hierarchyTableName, err := hierarchyTable.Name()
+		hierarchyTable, err = hierarchyTable.Snapshot()
 		if err != nil {
-			return metadata, fmt.Errorf("get default hierarchy table name for variation %q on %q.%q: %w", name, tableName, columnName, err)
+			return metadata, fmt.Errorf("read default hierarchy table properties for variation %q on %q.%q: %w", name, tableName, columnName, err)
 		}
-		metadata.defaultHierarchy = &hierarchyReference{table: hierarchyTableName, hierarchy: hierarchyName}
+		metadata.defaultHierarchy = &hierarchyReference{table: hierarchyTable.Name, hierarchy: hierarchyName}
 	}
 
 	relationship, err := variation.Relationship()
@@ -299,11 +282,11 @@ func readTOMVariation(tableName, columnName string, variation tom.Variation) (va
 		return metadata, fmt.Errorf("get relationship for variation %q on %q.%q: %w", name, tableName, columnName, err)
 	}
 	if relationship.TOMValue().Handle != 0 {
-		relationshipType, err := relationship.Type()
+		relationship, err = relationship.Snapshot()
 		if err != nil {
-			return metadata, fmt.Errorf("get relationship type for variation %q on %q.%q: %w", name, tableName, columnName, err)
+			return metadata, fmt.Errorf("read relationship properties for variation %q on %q.%q: %w", name, tableName, columnName, err)
 		}
-		if relationshipType != tom.RelationshipTypeSingleColumn {
+		if relationship.Type != tom.RelationshipTypeSingleColumn {
 			return metadata, nil
 		}
 		singleColumn := tom.AsSingleColumnRelationship(relationship.TOMValue())
@@ -327,7 +310,7 @@ func readTOMVariation(tableName, columnName string, variation tom.Variation) (va
 }
 
 func tomColumnReference(column tom.Column) (columnReference, error) {
-	columnName, err := column.Name()
+	column, err := column.Snapshot()
 	if err != nil {
 		return columnReference{}, err
 	}
@@ -335,11 +318,11 @@ func tomColumnReference(column tom.Column) (columnReference, error) {
 	if err != nil {
 		return columnReference{}, err
 	}
-	tableName, err := table.Name()
+	table, err = table.Snapshot()
 	if err != nil {
 		return columnReference{}, err
 	}
-	return columnReference{table: tableName, column: columnName}, nil
+	return columnReference{table: table.Name, column: column.Name}, nil
 }
 
 func readCalculatedExpressions(tableName string, table tom.Table) ([]string, error) {
@@ -357,22 +340,22 @@ func readCalculatedExpressions(tableName string, table tom.Table) ([]string, err
 	var expressions []string
 	for _, item := range partitionItems {
 		partition := tom.AsPartition(item)
-		sourceType, err := partition.SourceType()
+		partition, err = partition.Snapshot()
 		if err != nil {
-			return nil, fmt.Errorf("get partition source type for table %q: %w", tableName, err)
+			return nil, fmt.Errorf("read partition properties for table %q: %w", tableName, err)
 		}
-		if sourceType != tom.PartitionSourceTypeCalculated {
+		if partition.SourceType != tom.PartitionSourceTypeCalculated {
 			continue
 		}
 		source, err := partition.Source()
 		if err != nil {
 			return nil, fmt.Errorf("get calculated partition source for table %q: %w", tableName, err)
 		}
-		expression, err := tom.AsCalculatedPartitionSource(source.TOMValue()).Expression()
+		calculatedSource, err := tom.AsCalculatedPartitionSource(source.TOMValue()).Snapshot()
 		if err != nil {
-			return nil, fmt.Errorf("get calculated partition expression for table %q: %w", tableName, err)
+			return nil, fmt.Errorf("read calculated partition source properties for table %q: %w", tableName, err)
 		}
-		expressions = append(expressions, expression)
+		expressions = append(expressions, calculatedSource.Expression)
 	}
 	return expressions, nil
 }
