@@ -21,6 +21,11 @@ go run .
 
 The example discovers the open Power BI Desktop Analysis Services workspace, connects to it,
 reads `Server.Databases[0].Model.Tables`, and prints each table and its column count.
+Use `--output-path` (or `-o`) to choose where table folders are created:
+
+```powershell
+go run . --output-path .\test
+```
 
 The default DLL path is `tom\bin\tombridge.dll`. Set `TOM_BRIDGE_DLL` to load another build.
 

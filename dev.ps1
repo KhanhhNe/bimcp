@@ -5,7 +5,11 @@ $testRoot = Join-Path $repoRoot "test"
 function Start-Service {
     Write-Host "Starting bimcp..."
     Clear-Host
-    Start-Process -FilePath "go" -ArgumentList @("run", "..") -WorkingDirectory $testRoot -NoNewWindow -PassThru
+    Start-Process -FilePath "go" `
+        -ArgumentList @("run", ".", "--output-path", $testRoot) `
+        -WorkingDirectory $repoRoot `
+        -NoNewWindow `
+        -PassThru
 }
 
 function Stop-Service([System.Diagnostics.Process]$process) {
