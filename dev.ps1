@@ -1,6 +1,6 @@
 $repoRoot = $PSScriptRoot
-$env:TOM_BRIDGE_DLL = Join-Path $repoRoot "tom\bin\tombridge.dll"
 $testRoot = Join-Path $repoRoot "test"
+$env:TOM_BRIDGE_DLL = Join-Path $repoRoot "tom\bin\tombridge.dll"
 
 function Start-Service {
     Write-Host "Starting bimcp..."
