@@ -1,5 +1,7 @@
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using TOM = Microsoft.AnalysisServices.Tabular;
 
 var outputPath = args.Length > 0
@@ -9,7 +11,9 @@ var outputPath = args.Length > 0
 var generator = new GoGenerator(typeof(TOM.Server).Assembly);
 Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
 File.WriteAllText(outputPath, generator.Generate(), new UTF8Encoding(false));
-Console.WriteLine($"Generated {outputPath}: {generator.GeneratedTypeCount} types, {generator.GeneratedMemberCount} members");
+Console.WriteLine(
+    $"Generated {outputPath}: {generator.GeneratedTypeCount} types, {generator.GeneratedMemberCount} members, " +
+    $"{generator.OfficialDocumentationCount} official docs, {generator.FallbackDocumentationCount} fallbacks");
 
 internal sealed class GoGenerator
 {
@@ -24,6 +28,7 @@ internal sealed class GoGenerator
     private readonly Type[] _types;
     private readonly Dictionary<Type, string> _goNames = [];
     private readonly StringBuilder _output = new();
+    private readonly XmlDocumentation _docs;
 
     public GoGenerator(Assembly assembly)
     {
@@ -32,11 +37,14 @@ internal sealed class GoGenerator
             .Where(type => type.Namespace?.StartsWith("Microsoft.AnalysisServices.Tabular", StringComparison.Ordinal) == true)
             .OrderBy(type => type.FullName, StringComparer.Ordinal)
             .ToArray();
+        _docs = XmlDocumentation.Load(Path.GetDirectoryName(assembly.Location)!);
         BuildTypeNames();
     }
 
     public int GeneratedTypeCount { get; private set; }
     public int GeneratedMemberCount { get; private set; }
+    public int OfficialDocumentationCount { get; private set; }
+    public int FallbackDocumentationCount { get; private set; }
 
     public string Generate()
     {
@@ -76,13 +84,16 @@ internal sealed class GoGenerator
     private void GenerateEnum(Type type)
     {
         var goName = _goNames[type];
-        Line($"// {goName} maps CLR enum {type.FullName}.");
+        Documentation(goName, type, $"Maps CLR enum {type.FullName}.");
         Line($"type {goName} string");
         Line();
         Line("const (");
         foreach (var name in Enum.GetNames(type))
         {
-            Line($"\t{goName}{Identifier(name)} {goName} = {Quote(name)}");
+            var constantName = goName + Identifier(name);
+            var field = type.GetField(name, BindingFlags.Static | BindingFlags.Public)!;
+            Documentation(constantName, field, $"Maps {type.FullName}.{name}.", "\t");
+            Line($"\t{constantName} {goName} = {Quote(name)}");
         }
         Line(")");
         Line();
@@ -92,9 +103,10 @@ internal sealed class GoGenerator
     {
         var goName = _goNames[type];
         var clrName = FriendlyTypeName(type);
-        Line($"// {goName} maps CLR type {clrName}.");
+        Documentation(goName, type, $"Maps CLR type {clrName}.");
         Line($"type {goName} struct {{ objectRef }}");
         Line();
+        Documentation($"As{goName}", null, $"Wraps a managed TOM handle as {goName}.", learnLink: LearnLink(type));
         Line($"func As{goName}(value Value) {goName} {{ return {goName}{{objectRef: objectRef{{Value: value}}}} }}");
         Line();
 
@@ -141,6 +153,7 @@ internal sealed class GoGenerator
             var constructor = constructors[index];
             var parameters = constructor.GetParameters();
             var declaration = ParameterDeclaration(parameters);
+            Documentation(names[index], constructor, $"Creates a new {goName}.");
             Line($"func {names[index]}(client *Client{Comma(declaration)}) ({goName}, error) {{");
             Line($"\tvalue, err := client.CreateExact({Quote(clrName)}, {TypeList(parameters)}{Comma(ArgumentList(parameters))})");
             Line($"\treturn As{goName}(value), err");
@@ -156,6 +169,7 @@ internal sealed class GoGenerator
         var getterName = reservedNames.Contains(propertyName) ? "Get" + propertyName : propertyName;
         if (property.CanRead && property.GetMethod is { IsStatic: false })
         {
+            Documentation(getterName, property, $"Gets {owner}.{property.Name}.");
             GenerateReadBody($"func (receiver {owner}) {getterName}()", property.PropertyType,
                 $"receiver.objectRef.Value.Get({Quote(property.Name)}, &result)",
                 $"receiver.objectRef.Value.GetValue({Quote(property.Name)})",
@@ -165,6 +179,7 @@ internal sealed class GoGenerator
         if (property.CanWrite && property.SetMethod is { IsStatic: false })
         {
             var parameterType = GoParameterType(property.PropertyType);
+            Documentation($"Set{propertyName}", property, $"Sets {owner}.{property.Name}.");
             Line($"func (receiver {owner}) Set{propertyName}(input {parameterType}) error {{");
             Line($"\treturn receiver.objectRef.Value.Set({Quote(property.Name)}, input)");
             Line("}");
@@ -177,6 +192,7 @@ internal sealed class GoGenerator
     {
         var fieldName = Identifier(field.Name);
         var getterName = reservedNames.Contains(fieldName) ? "Get" + fieldName : fieldName;
+        Documentation(getterName, field, $"Gets {owner}.{field.Name}.");
         GenerateReadBody($"func (receiver {owner}) {getterName}()", field.FieldType,
             $"receiver.objectRef.Value.GetField({Quote(field.Name)}, &result)",
             $"receiver.objectRef.Value.GetFieldValue({Quote(field.Name)})",
@@ -184,6 +200,7 @@ internal sealed class GoGenerator
         GeneratedMemberCount++;
         if (!field.IsInitOnly && !field.IsLiteral)
         {
+            Documentation($"Set{fieldName}", field, $"Sets {owner}.{field.Name}.");
             Line($"func (receiver {owner}) Set{fieldName}(input {GoParameterType(field.FieldType)}) error {{");
             Line($"\treturn receiver.objectRef.Value.SetField({Quote(field.Name)}, input)");
             Line("}");
@@ -217,6 +234,7 @@ internal sealed class GoGenerator
         var parameters = method.GetParameters();
         if (method.IsGenericMethodDefinition || parameters.Any(parameter => parameter.ParameterType.IsByRef))
         {
+            Documentation(name, method, $"Invokes {owner}.{method.Name}.");
             Line($"func (receiver {owner}) {name}(args ...any) (any, error) {{");
             Line($"\treturn receiver.objectRef.Value.InvokeAny({Quote(method.Name)}, args...)");
             Line("}");
@@ -226,6 +244,7 @@ internal sealed class GoGenerator
         }
 
         var declaration = ParameterDeclaration(parameters);
+        Documentation(name, method, $"Invokes {owner}.{method.Name}.");
         GenerateInvokeBody(
             $"func (receiver {owner}) {name}({declaration})",
             method.ReturnType,
@@ -247,6 +266,7 @@ internal sealed class GoGenerator
             var name = Identifier(property.Name);
             if (property.CanRead)
             {
+                Documentation(owner + name, property, $"Gets static property {type.Name}.{property.Name}.");
                 GenerateReadBody($"func {owner}{name}(client *Client)", property.PropertyType,
                     $"client.GetStatic({Quote(clrName)}, {Quote(property.Name)}, &result)",
                     $"client.GetStaticValue({Quote(clrName)}, {Quote(property.Name)})",
@@ -255,6 +275,7 @@ internal sealed class GoGenerator
             }
             if (property.CanWrite)
             {
+                Documentation($"Set{owner}{name}", property, $"Sets static property {type.Name}.{property.Name}.");
                 Line($"func Set{owner}{name}(client *Client, input {GoParameterType(property.PropertyType)}) error {{");
                 Line($"\treturn client.SetStatic({Quote(clrName)}, {Quote(property.Name)}, input)");
                 Line("}");
@@ -270,6 +291,7 @@ internal sealed class GoGenerator
                      .OrderBy(field => field.Name, StringComparer.Ordinal))
         {
             var name = Identifier(field.Name);
+            Documentation(owner + name, field, $"Gets static field {type.Name}.{field.Name}.");
             GenerateReadBody($"func {owner}{name}(client *Client)", field.FieldType,
                 $"client.GetStaticField({Quote(clrName)}, {Quote(field.Name)}, &result)",
                 $"client.GetStaticFieldValue({Quote(clrName)}, {Quote(field.Name)})",
@@ -277,6 +299,7 @@ internal sealed class GoGenerator
             GeneratedMemberCount++;
             if (!field.IsInitOnly && !field.IsLiteral)
             {
+                Documentation($"Set{owner}{name}", field, $"Sets static field {type.Name}.{field.Name}.");
                 Line($"func Set{owner}{name}(client *Client, input {GoParameterType(field.FieldType)}) error {{");
                 Line($"\treturn client.SetStaticField({Quote(clrName)}, {Quote(field.Name)}, input)");
                 Line("}");
@@ -304,6 +327,7 @@ internal sealed class GoGenerator
                 var parameters = method.GetParameters();
                 if (method.IsGenericMethodDefinition || parameters.Any(parameter => parameter.ParameterType.IsByRef))
                 {
+                    Documentation(names[index], method, $"Invokes static method {type.Name}.{method.Name}.");
                     Line($"func {names[index]}(client *Client, args ...any) (any, error) {{");
                     Line($"\treturn client.InvokeStaticAny({Quote(clrName)}, {Quote(method.Name)}, args...)");
                     Line("}");
@@ -312,6 +336,7 @@ internal sealed class GoGenerator
                     continue;
                 }
 
+                Documentation(names[index], method, $"Invokes static method {type.Name}.{method.Name}.");
                 GenerateInvokeBody(
                     $"func {names[index]}(client *Client{Comma(ParameterDeclaration(parameters))})",
                     method.ReturnType,
@@ -502,6 +527,81 @@ internal sealed class GoGenerator
 
     private static bool CanGenerateType(Type type) => !type.ContainsGenericParameters;
 
+    private void Documentation(
+        string identifier,
+        MemberInfo? member,
+        string fallback,
+        string indent = "",
+        string? learnLink = null)
+    {
+        var entry = member is null ? null : _docs.Find(member);
+        if (entry is null)
+        {
+            FallbackDocumentationCount++;
+        }
+        else
+        {
+            OfficialDocumentationCount++;
+        }
+        var summary = entry?.Summary ?? fallback;
+        Comment(identifier + ": " + summary, indent);
+        if (!string.IsNullOrWhiteSpace(entry?.Remarks))
+        {
+            Comment("Remarks: " + entry.Remarks, indent);
+        }
+        if (entry is not null)
+        {
+            foreach (var parameter in entry.Parameters)
+            {
+                Comment($"Parameter {parameter.Key}: {parameter.Value}", indent);
+            }
+            if (!string.IsNullOrWhiteSpace(entry.Returns))
+            {
+                Comment("Returns: " + entry.Returns, indent);
+            }
+            foreach (var exception in entry.Exceptions)
+            {
+                Comment($"May return {exception.Key}: {exception.Value}", indent);
+            }
+        }
+        var link = learnLink ?? (member is null ? null : LearnLink(member));
+        if (link is not null)
+        {
+            Line($"{indent}// Microsoft Learn: {link}");
+        }
+    }
+
+    private void Comment(string text, string indent)
+    {
+        var words = Regex.Split(text.Trim(), @"\s+").Where(word => word.Length > 0).ToArray();
+        var line = new StringBuilder();
+        foreach (var word in words)
+        {
+            if (line.Length > 0 && line.Length + word.Length + 1 > 108)
+            {
+                Line($"{indent}// {line}");
+                line.Clear();
+            }
+            if (line.Length > 0) line.Append(' ');
+            line.Append(word);
+        }
+        if (line.Length > 0) Line($"{indent}// {line}");
+    }
+
+    private static string LearnLink(MemberInfo member)
+    {
+        var type = member as Type ?? member.DeclaringType;
+        if (type?.FullName is null) return "https://learn.microsoft.com/dotnet/api/microsoft.analysisservices.tabular";
+        if (type.IsConstructedGenericType) type = type.GetGenericTypeDefinition();
+        var path = (type.FullName ?? type.Name).Replace('+', '.').Replace('`', '-').ToLowerInvariant();
+        if (member is not Type)
+        {
+            var memberName = member is ConstructorInfo ? "-ctor" : member.Name.ToLowerInvariant();
+            path += "." + memberName;
+        }
+        return $"https://learn.microsoft.com/dotnet/api/{path}?view=analysisservices-dotnet";
+    }
+
     private static string ParameterName(ParameterInfo parameter, int index = 0)
     {
         var name = parameter.Name ?? $"argument{index + 1}";
@@ -547,3 +647,168 @@ internal sealed class GoGenerator
     private sealed record ReturnMapping(string GoType, ReturnKind Kind);
     private enum ReturnKind { Primitive, Object, Any }
 }
+
+internal sealed class XmlDocumentation
+{
+    private readonly Dictionary<string, DocumentationEntry> _entries;
+
+    private XmlDocumentation(Dictionary<string, DocumentationEntry> entries)
+    {
+        _entries = entries;
+    }
+
+    public static XmlDocumentation Load(string directory)
+    {
+        var entries = new Dictionary<string, DocumentationEntry>(StringComparer.Ordinal);
+        foreach (var path in Directory.EnumerateFiles(directory, "Microsoft.AnalysisServices*.xml"))
+        {
+            var document = XDocument.Load(path, LoadOptions.PreserveWhitespace);
+            foreach (var member in document.Descendants("member"))
+            {
+                var name = member.Attribute("name")?.Value;
+                if (string.IsNullOrWhiteSpace(name)) continue;
+                entries[name] = new DocumentationEntry(
+                    Text(member.Element("summary")),
+                    Text(member.Element("remarks")),
+                    Text(member.Element("returns")),
+                    member.Elements("param")
+                        .Where(element => element.Attribute("name") is not null)
+                        .ToDictionary(
+                            element => element.Attribute("name")!.Value,
+                            Text,
+                            StringComparer.Ordinal),
+                    member.Elements("exception")
+                        .ToDictionary(
+                            element => DisplayReference(element.Attribute("cref")?.Value),
+                            Text,
+                            StringComparer.Ordinal));
+            }
+        }
+        return new XmlDocumentation(entries);
+    }
+
+    public DocumentationEntry? Find(MemberInfo member)
+    {
+        member = NormalizeMember(member);
+        var id = DocumentationId(member);
+        return id is not null && _entries.TryGetValue(id, out var entry) ? entry : null;
+    }
+
+    private static MemberInfo NormalizeMember(MemberInfo member)
+    {
+        var declaringType = member.DeclaringType;
+        if (declaringType is null || !declaringType.IsConstructedGenericType) return member;
+        var definition = declaringType.GetGenericTypeDefinition();
+        try
+        {
+            return definition.GetMembers(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+                       .FirstOrDefault(candidate => candidate.MetadataToken == member.MetadataToken)
+                   ?? member;
+        }
+        catch (InvalidOperationException)
+        {
+            return member;
+        }
+    }
+
+    private static string? DocumentationId(MemberInfo member) => member switch
+    {
+        Type type => "T:" + TypeName(type),
+        ConstructorInfo constructor => "M:" + TypeName(constructor.DeclaringType!) + ".#ctor" +
+                                       ParameterList(constructor.GetParameters()),
+        MethodInfo method => "M:" + TypeName(method.DeclaringType!) + "." + method.Name +
+                             (method.IsGenericMethodDefinition ? "``" + method.GetGenericArguments().Length : "") +
+                             ParameterList(method.GetParameters()),
+        PropertyInfo property => "P:" + TypeName(property.DeclaringType!) + "." + property.Name +
+                                 ParameterList(property.GetIndexParameters()),
+        FieldInfo field => "F:" + TypeName(field.DeclaringType!) + "." + field.Name,
+        EventInfo eventInfo => "E:" + TypeName(eventInfo.DeclaringType!) + "." + eventInfo.Name,
+        _ => null
+    };
+
+    private static string ParameterList(ParameterInfo[] parameters) =>
+        parameters.Length == 0
+            ? string.Empty
+            : "(" + string.Join(",", parameters.Select(parameter => ParameterTypeName(parameter.ParameterType))) + ")";
+
+    private static string TypeName(Type type) =>
+        (type.FullName ?? type.Name).Replace('+', '.');
+
+    private static string ParameterTypeName(Type type)
+    {
+        if (type.IsByRef) return ParameterTypeName(type.GetElementType()!) + "@";
+        if (type.IsPointer) return ParameterTypeName(type.GetElementType()!) + "*";
+        if (type.IsArray)
+        {
+            var rank = type.GetArrayRank();
+            return ParameterTypeName(type.GetElementType()!) +
+                   (rank == 1 ? "[]" : "[" + string.Join(",", Enumerable.Repeat("0:", rank)) + "]");
+        }
+        if (type.IsGenericParameter)
+        {
+            return type.DeclaringMethod is null ? "`" + type.GenericParameterPosition : "``" + type.GenericParameterPosition;
+        }
+        if (type.IsGenericType)
+        {
+            var definitionName = TypeName(type.GetGenericTypeDefinition()).Split('`')[0];
+            return definitionName + "{" + string.Join(",", type.GetGenericArguments().Select(ParameterTypeName)) + "}";
+        }
+        return TypeName(type);
+    }
+
+    private static string Text(XElement? element)
+    {
+        if (element is null) return string.Empty;
+        var builder = new StringBuilder();
+        AppendNode(element, builder);
+        return Regex.Replace(builder.ToString(), @"\s+", " ").Trim();
+    }
+
+    private static void AppendNode(XNode node, StringBuilder builder)
+    {
+        if (node is XText text)
+        {
+            builder.Append(text.Value);
+            return;
+        }
+        if (node is not XElement element) return;
+        switch (element.Name.LocalName)
+        {
+            case "see":
+                builder.Append(element.Attribute("langword")?.Value
+                               ?? element.Attribute("href")?.Value
+                               ?? DisplayReference(element.Attribute("cref")?.Value));
+                return;
+            case "paramref":
+            case "typeparamref":
+                builder.Append(element.Attribute("name")?.Value);
+                return;
+            case "c":
+            case "code":
+                builder.Append('`').Append(element.Value.Trim()).Append('`');
+                return;
+        }
+        foreach (var child in element.Nodes())
+        {
+            AppendNode(child, builder);
+        }
+        if (element.Name.LocalName is "para" or "item" or "term" or "description")
+        {
+            builder.Append(' ');
+        }
+    }
+
+    private static string DisplayReference(string? reference)
+    {
+        if (string.IsNullOrWhiteSpace(reference)) return string.Empty;
+        var value = reference.Length > 2 && reference[1] == ':' ? reference[2..] : reference;
+        return value.Replace('#', '.');
+    }
+}
+
+internal sealed record DocumentationEntry(
+    string Summary,
+    string Remarks,
+    string Returns,
+    IReadOnlyDictionary<string, string> Parameters,
+    IReadOnlyDictionary<string, string> Exceptions);

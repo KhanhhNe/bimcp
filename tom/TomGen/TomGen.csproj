@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AnalysisServices" Version="19.117.0" />
+    <PackageReference Include="Microsoft.AnalysisServices" Version="19.117.0" GeneratePathProperty="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(PkgMicrosoft_AnalysisServices)\lib\net8.0\Microsoft.AnalysisServices*.xml"
+          CopyToOutputDirectory="PreserveNewest"
+          Link="%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>

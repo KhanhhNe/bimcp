@@ -46,6 +46,14 @@ Requirements are Windows x64, Go 1.25+, the .NET 10 SDK, and Visual Studio C++ b
 Do not edit `tom\generated.go` manually. Keep the `Microsoft.AnalysisServices` package versions in
 `TomBridge.csproj` and `TomGen.csproj` synchronized.
 
+### Generated documentation
+
+`TomGen` reads the XML documentation shipped in the `Microsoft.AnalysisServices` NuGet package.
+Generated Go types and members include the official summary, remarks, parameter descriptions,
+return description, documented exceptions, and a Microsoft Learn link. When Microsoft does not
+ship XML documentation for a member, `TomGen` emits a reflection-derived description and keeps the
+Learn link so every generated declaration remains discoverable in Go tooling.
+
 ## Low-level mapping
 
 `tom.Value` is a managed TOM object handle:
