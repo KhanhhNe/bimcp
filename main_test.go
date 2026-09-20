@@ -151,3 +151,27 @@ func TestTimeCallsRunsAllConcurrentCalls(t *testing.T) {
 		t.Fatalf("peak in-flight calls = %d, want 3", run.peakInFlight)
 	}
 }
+
+func TestParseWorkerCountsSortsAndDeduplicates(t *testing.T) {
+	got, err := parseWorkerCounts("8, 2,4,2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []int{2, 4, 8}
+	if len(got) != len(want) {
+		t.Fatalf("parseWorkerCounts() = %v, want %v", got, want)
+	}
+	for index := range want {
+		if got[index] != want[index] {
+			t.Fatalf("parseWorkerCounts() = %v, want %v", got, want)
+		}
+	}
+}
+
+func TestParseWorkerCountsRejectsInvalidValues(t *testing.T) {
+	for _, spec := range []string{"", "0", "2,nope"} {
+		if _, err := parseWorkerCounts(spec); err == nil {
+			t.Fatalf("parseWorkerCounts(%q) succeeded, want error", spec)
+		}
+	}
+}

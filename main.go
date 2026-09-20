@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -22,10 +24,14 @@ func main() {
 	var outputPath string
 	var concurrencyTest bool
 	var concurrencyIterations int
+	var concurrencyWorkers string
+	var concurrencyDetails bool
 	flag.StringVar(&outputPath, "output-path", ".", "directory where table folders are created")
 	flag.StringVar(&outputPath, "o", ".", "directory where table folders are created")
-	flag.BoolVar(&concurrencyTest, "concurrency-test", false, "compare sequential and concurrent TOM column snapshots, then exit")
-	flag.IntVar(&concurrencyIterations, "concurrency-iterations", 1000, "column snapshots per worker in concurrency test mode")
+	flag.BoolVar(&concurrencyTest, "concurrency-test", false, "run the TOM concurrency benchmark suite, then exit")
+	flag.IntVar(&concurrencyIterations, "concurrency-iterations", 1000, "TOM calls per worker in concurrency test mode")
+	flag.StringVar(&concurrencyWorkers, "concurrency-workers", "2,4,8,16,32", "comma-separated worker counts for concurrency tests")
+	flag.BoolVar(&concurrencyDetails, "concurrency-details", false, "print per-worker timing details")
 	flag.Parse()
 
 	client, err := tom.Open("")
@@ -60,7 +66,7 @@ func main() {
 	}
 	database := tom.AsDatabase(databaseValue)
 	if concurrencyTest {
-		if err := testColumnSnapshotConcurrency(database, concurrencyIterations); err != nil {
+		if err := testTOMConcurrency(database, concurrencyIterations, concurrencyWorkers, concurrencyDetails); err != nil {
 			log.Fatal(err)
 		}
 		return
@@ -144,9 +150,19 @@ type timedRun struct {
 	peakInFlight int
 }
 
-func testColumnSnapshotConcurrency(database tom.Database, iterations int) error {
+type concurrencyBenchmark struct {
+	name   string
+	labels []string
+	call   func(index int) error
+}
+
+func testTOMConcurrency(database tom.Database, iterations int, workerSpec string, details bool) error {
 	if iterations < 1 {
 		return fmt.Errorf("concurrency iterations must be at least 1; got %d", iterations)
+	}
+	workerCounts, err := parseWorkerCounts(workerSpec)
+	if err != nil {
+		return err
 	}
 	if err := database.Refresh(); err != nil {
 		return err
@@ -164,17 +180,23 @@ func testColumnSnapshotConcurrency(database tom.Database, iterations int) error 
 		return err
 	}
 
+	var tableValues []tom.Table
+	var tableLabels []string
+	var columnCollections []tom.ColumnCollection
 	var columns []tom.Column
-	var labels []string
+	var columnLabels []string
 	for _, item := range tableItems {
 		table, err := tom.AsTable(item).Snapshot()
 		if err != nil {
 			return fmt.Errorf("read table properties: %w", err)
 		}
+		tableValues = append(tableValues, table)
+		tableLabels = append(tableLabels, table.Name)
 		columnCollection, err := table.Columns()
 		if err != nil {
 			return fmt.Errorf("get columns for table %q: %w", table.Name, err)
 		}
+		columnCollections = append(columnCollections, columnCollection)
 		columnItems, err := columnCollection.Items(0)
 		if err != nil {
 			return fmt.Errorf("enumerate columns for table %q: %w", table.Name, err)
@@ -186,46 +208,141 @@ func testColumnSnapshotConcurrency(database tom.Database, iterations int) error 
 				return fmt.Errorf("warm column snapshot for table %q: %w", table.Name, err)
 			}
 			columns = append(columns, column)
-			labels = append(labels, table.Name+"."+snapshot.Name)
+			columnLabels = append(columnLabels, table.Name+"."+snapshot.Name)
 		}
 	}
 	if len(columns) < 2 {
 		return fmt.Errorf("concurrency test requires at least two columns; found %d", len(columns))
 	}
 
-	fmt.Printf("Testing %d warmed columns with %d snapshots per column\n", len(columns), iterations)
-	sequential := timeCalls(labels, false, func(index int) error {
-		for range iterations {
-			if _, err := columns[index].Snapshot(); err != nil {
+	benchmarks := []concurrencyBenchmark{
+		{
+			name:   "distinct column snapshot",
+			labels: columnLabels,
+			call: func(index int) error {
+				_, err := columns[index%len(columns)].Snapshot()
 				return err
-			}
-		}
-		return nil
-	})
-	concurrent := timeCalls(labels, true, func(index int) error {
-		for range iterations {
-			if _, err := columns[index].Snapshot(); err != nil {
+			},
+		},
+		{
+			name:   "shared column snapshot",
+			labels: []string{columnLabels[0]},
+			call: func(int) error {
+				_, err := columns[0].Snapshot()
 				return err
-			}
-		}
-		return nil
-	})
-
-	printTimingRun("Sequential", sequential, false)
-	printTimingRun("Concurrent", concurrent, true)
-
-	speedup := float64(sequential.elapsed) / float64(concurrent.elapsed)
-	fmt.Printf("Observed speedup: %.2fx; peak Go calls in flight: %d\n", speedup, concurrent.peakInFlight)
-	switch {
-	case speedup >= 1.25:
-		fmt.Println("Result: concurrent execution detected.")
-	case speedup <= 1.10:
-		fmt.Println("Result: calls appear serialized by TOM or Power BI.")
-	default:
-		fmt.Println("Result: inconclusive; rerun with a larger model or slower column calls.")
+			},
+		},
+		{
+			name:   "distinct column Name get",
+			labels: columnLabels,
+			call: func(index int) error {
+				var name string
+				return columns[index%len(columns)].TOMValue().Get("Name", &name)
+			},
+		},
+		{
+			name:   "table snapshot",
+			labels: tableLabels,
+			call: func(index int) error {
+				_, err := tableValues[index%len(tableValues)].Snapshot()
+				return err
+			},
+		},
+		{
+			name:   "column collection items",
+			labels: tableLabels,
+			call: func(index int) error {
+				_, err := columnCollections[index%len(columnCollections)].Items(0)
+				return err
+			},
+		},
+		{
+			name:   "mixed metadata reads",
+			labels: columnLabels,
+			call: func(index int) error {
+				switch index % 3 {
+				case 0:
+					_, err := columns[index%len(columns)].Snapshot()
+					return err
+				case 1:
+					var name string
+					return columns[index%len(columns)].TOMValue().Get("Name", &name)
+				default:
+					_, err := columnCollections[index%len(columnCollections)].Items(0)
+					return err
+				}
+			},
+		},
 	}
 
+	fmt.Printf(
+		"Testing %d warmed columns and %d tables with %d calls per worker\n",
+		len(columns),
+		len(tableValues),
+		iterations,
+	)
+	fmt.Printf("%-27s %7s %12s %12s %9s %8s\n", "Case", "Workers", "Sequential", "Concurrent", "Speedup", "Peak")
+	for _, benchmark := range benchmarks {
+		for _, workers := range workerCounts {
+			if err := runConcurrencyBenchmark(benchmark, workers, iterations, details); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func runConcurrencyBenchmark(benchmark concurrencyBenchmark, workers, iterations int, details bool) error {
+	labels := make([]string, workers)
+	for index := range labels {
+		labels[index] = benchmark.labels[index%len(benchmark.labels)]
+	}
+	call := func(index int) error {
+		for range iterations {
+			if err := benchmark.call(index); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	sequential := timeCalls(labels, false, call)
+	concurrent := timeCalls(labels, true, call)
+
+	speedup := float64(sequential.elapsed) / float64(concurrent.elapsed)
+	fmt.Printf(
+		"%-27s %7d %12s %12s %8.2fx %8d\n",
+		benchmark.name,
+		workers,
+		sequential.elapsed.Round(time.Microsecond),
+		concurrent.elapsed.Round(time.Microsecond),
+		speedup,
+		concurrent.peakInFlight,
+	)
+	if details {
+		printTimingRun("Concurrent worker details", concurrent, true)
+	}
 	return timingErrors(sequential, concurrent)
+}
+
+func parseWorkerCounts(spec string) ([]int, error) {
+	var result []int
+	seen := make(map[int]struct{})
+	for _, part := range strings.Split(spec, ",") {
+		value, err := strconv.Atoi(strings.TrimSpace(part))
+		if err != nil || value < 1 {
+			return nil, fmt.Errorf("invalid concurrency worker count %q", part)
+		}
+		if _, exists := seen[value]; exists {
+			continue
+		}
+		seen[value] = struct{}{}
+		result = append(result, value)
+	}
+	if len(result) == 0 {
+		return nil, errors.New("at least one concurrency worker count is required")
+	}
+	sort.Ints(result)
+	return result, nil
 }
 
 func timeCalls(labels []string, concurrent bool, call func(index int) error) timedRun {
