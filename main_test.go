@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func TestNewTablesDetectsTablesAddedAfterStartup(t *testing.T) {
@@ -120,5 +121,33 @@ func TestAssociateTablesDoesNotReverseOrdinaryCalculatedTableDependencies(t *tes
 
 	if got := associated[1].associatedColumns; len(got) != 0 {
 		t.Fatalf("associated columns = %#v, want none", got)
+	}
+}
+
+func TestTimeCallsRunsAllConcurrentCalls(t *testing.T) {
+	release := make(chan struct{})
+	started := make(chan struct{}, 3)
+	done := make(chan timedRun, 1)
+
+	go func() {
+		done <- timeCalls([]string{"a", "b", "c"}, true, func(int) error {
+			started <- struct{}{}
+			<-release
+			return nil
+		})
+	}()
+
+	for range 3 {
+		select {
+		case <-started:
+		case <-time.After(time.Second):
+			t.Fatal("concurrent calls did not all start")
+		}
+	}
+	close(release)
+	run := <-done
+
+	if run.peakInFlight != 3 {
+		t.Fatalf("peak in-flight calls = %d, want 3", run.peakInFlight)
 	}
 }

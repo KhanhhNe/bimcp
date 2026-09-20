@@ -422,8 +422,17 @@ public static class NativeExports
         if (value is null) return null;
         if (value is string text) return JsonValue.Create(text);
         if (value is bool boolean) return JsonValue.Create(boolean);
-        if (value is byte or sbyte or short or ushort or int or uint or long or ulong or float or double or decimal)
-            return JsonSerializer.SerializeToNode(value);
+        if (value is byte byteValue) return JsonValue.Create(byteValue);
+        if (value is sbyte sbyteValue) return JsonValue.Create(sbyteValue);
+        if (value is short shortValue) return JsonValue.Create(shortValue);
+        if (value is ushort ushortValue) return JsonValue.Create(ushortValue);
+        if (value is int intValue) return JsonValue.Create(intValue);
+        if (value is uint uintValue) return JsonValue.Create(uintValue);
+        if (value is long longValue) return JsonValue.Create(longValue);
+        if (value is ulong ulongValue) return JsonValue.Create(ulongValue);
+        if (value is float floatValue) return JsonValue.Create(floatValue);
+        if (value is double doubleValue) return JsonValue.Create(doubleValue);
+        if (value is decimal decimalValue) return JsonValue.Create(decimalValue);
         if (value is DateTime dateTime) return JsonValue.Create(dateTime);
         if (value is Guid guid) return JsonValue.Create(guid);
         if (value.GetType().IsEnum) return JsonValue.Create(value.ToString());

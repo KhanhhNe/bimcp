@@ -9,6 +9,8 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"bimcp/tom"
@@ -18,8 +20,12 @@ const modelPollInterval = time.Second
 
 func main() {
 	var outputPath string
+	var concurrencyTest bool
+	var concurrencyIterations int
 	flag.StringVar(&outputPath, "output-path", ".", "directory where table folders are created")
 	flag.StringVar(&outputPath, "o", ".", "directory where table folders are created")
+	flag.BoolVar(&concurrencyTest, "concurrency-test", false, "compare sequential and concurrent TOM column snapshots, then exit")
+	flag.IntVar(&concurrencyIterations, "concurrency-iterations", 1000, "column snapshots per worker in concurrency test mode")
 	flag.Parse()
 
 	client, err := tom.Open("")
@@ -53,6 +59,12 @@ func main() {
 		log.Fatal(err)
 	}
 	database := tom.AsDatabase(databaseValue)
+	if concurrencyTest {
+		if err := testColumnSnapshotConcurrency(database, concurrencyIterations); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
 	tables, err := loadTOMTables(database)
 	if err != nil {
 		log.Fatal(err)
@@ -117,6 +129,209 @@ type columnReference struct {
 type hierarchyReference struct {
 	table     string
 	hierarchy string
+}
+
+type timedCall struct {
+	label     string
+	startedAt time.Time
+	endedAt   time.Time
+	err       error
+}
+
+type timedRun struct {
+	calls        []timedCall
+	elapsed      time.Duration
+	peakInFlight int
+}
+
+func testColumnSnapshotConcurrency(database tom.Database, iterations int) error {
+	if iterations < 1 {
+		return fmt.Errorf("concurrency iterations must be at least 1; got %d", iterations)
+	}
+	if err := database.Refresh(); err != nil {
+		return err
+	}
+	model, err := database.Model()
+	if err != nil {
+		return err
+	}
+	tables, err := model.Tables()
+	if err != nil {
+		return err
+	}
+	tableItems, err := tables.Items(0)
+	if err != nil {
+		return err
+	}
+
+	var columns []tom.Column
+	var labels []string
+	for _, item := range tableItems {
+		table, err := tom.AsTable(item).Snapshot()
+		if err != nil {
+			return fmt.Errorf("read table properties: %w", err)
+		}
+		columnCollection, err := table.Columns()
+		if err != nil {
+			return fmt.Errorf("get columns for table %q: %w", table.Name, err)
+		}
+		columnItems, err := columnCollection.Items(0)
+		if err != nil {
+			return fmt.Errorf("enumerate columns for table %q: %w", table.Name, err)
+		}
+		for _, columnItem := range columnItems {
+			column := tom.AsColumn(columnItem)
+			snapshot, err := column.Snapshot()
+			if err != nil {
+				return fmt.Errorf("warm column snapshot for table %q: %w", table.Name, err)
+			}
+			columns = append(columns, column)
+			labels = append(labels, table.Name+"."+snapshot.Name)
+		}
+	}
+	if len(columns) < 2 {
+		return fmt.Errorf("concurrency test requires at least two columns; found %d", len(columns))
+	}
+
+	fmt.Printf("Testing %d warmed columns with %d snapshots per column\n", len(columns), iterations)
+	sequential := timeCalls(labels, false, func(index int) error {
+		for range iterations {
+			if _, err := columns[index].Snapshot(); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	concurrent := timeCalls(labels, true, func(index int) error {
+		for range iterations {
+			if _, err := columns[index].Snapshot(); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+
+	printTimingRun("Sequential", sequential, false)
+	printTimingRun("Concurrent", concurrent, true)
+
+	speedup := float64(sequential.elapsed) / float64(concurrent.elapsed)
+	fmt.Printf("Observed speedup: %.2fx; peak Go calls in flight: %d\n", speedup, concurrent.peakInFlight)
+	switch {
+	case speedup >= 1.25:
+		fmt.Println("Result: concurrent execution detected.")
+	case speedup <= 1.10:
+		fmt.Println("Result: calls appear serialized by TOM or Power BI.")
+	default:
+		fmt.Println("Result: inconclusive; rerun with a larger model or slower column calls.")
+	}
+
+	return timingErrors(sequential, concurrent)
+}
+
+func timeCalls(labels []string, concurrent bool, call func(index int) error) timedRun {
+	result := timedRun{calls: make([]timedCall, len(labels))}
+	startedAt := time.Now()
+	if !concurrent {
+		for index, label := range labels {
+			result.calls[index] = executeTimedCall(label, func() error { return call(index) })
+		}
+		result.elapsed = time.Since(startedAt)
+		return result
+	}
+
+	start := make(chan struct{})
+	var ready sync.WaitGroup
+	var complete sync.WaitGroup
+	var inFlight atomic.Int64
+	var peakInFlight atomic.Int64
+	ready.Add(len(labels))
+	complete.Add(len(labels))
+	for index, label := range labels {
+		go func() {
+			defer complete.Done()
+			ready.Done()
+			<-start
+			current := inFlight.Add(1)
+			updatePeak(&peakInFlight, current)
+			result.calls[index] = executeTimedCall(label, func() error { return call(index) })
+			inFlight.Add(-1)
+		}()
+	}
+	ready.Wait()
+	startedAt = time.Now()
+	close(start)
+	complete.Wait()
+	result.elapsed = time.Since(startedAt)
+	result.peakInFlight = int(peakInFlight.Load())
+	return result
+}
+
+func updatePeak(peak *atomic.Int64, candidate int64) {
+	for {
+		current := peak.Load()
+		if candidate <= current || peak.CompareAndSwap(current, candidate) {
+			return
+		}
+	}
+}
+
+func executeTimedCall(label string, call func() error) timedCall {
+	result := timedCall{label: label, startedAt: time.Now()}
+	result.err = call()
+	result.endedAt = time.Now()
+	return result
+}
+
+func printTimingRun(name string, run timedRun, details bool) {
+	var sum time.Duration
+	for _, call := range run.calls {
+		sum += call.endedAt.Sub(call.startedAt)
+	}
+	fmt.Printf("%s: wall=%s, sum of call durations=%s\n", name, run.elapsed, sum)
+	if !details {
+		return
+	}
+
+	origin := earliestCallStart(run.calls)
+	for _, call := range run.calls {
+		status := "ok"
+		if call.err != nil {
+			status = call.err.Error()
+		}
+		fmt.Printf(
+			"  %-40s start=+%-10s end=+%-10s duration=%-10s %s\n",
+			call.label,
+			call.startedAt.Sub(origin),
+			call.endedAt.Sub(origin),
+			call.endedAt.Sub(call.startedAt),
+			status,
+		)
+	}
+}
+
+func earliestCallStart(calls []timedCall) time.Time {
+	earliest := calls[0].startedAt
+	for _, call := range calls[1:] {
+		if call.startedAt.Before(earliest) {
+			earliest = call.startedAt
+		}
+	}
+	return earliest
+}
+
+func timingErrors(runs ...timedRun) error {
+	var messages []string
+	for _, run := range runs {
+		for _, call := range run.calls {
+			if call.err != nil {
+				messages = append(messages, fmt.Sprintf("%s: %v", call.label, call.err))
+			}
+		}
+	}
+	if len(messages) > 0 {
+		return fmt.Errorf("column snapshot failures: %s", strings.Join(messages, "; "))
+	}
+	return nil
 }
 
 func loadTOMTables(database tom.Database) ([]tableMetadata, error) {
