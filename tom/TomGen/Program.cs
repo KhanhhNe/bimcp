@@ -544,29 +544,104 @@ internal sealed class GoGenerator
             OfficialDocumentationCount++;
         }
         var summary = entry?.Summary ?? fallback;
-        Comment(identifier + ": " + summary, indent);
+        Comment(summary, indent);
         if (!string.IsNullOrWhiteSpace(entry?.Remarks))
         {
             Comment("Remarks: " + entry.Remarks, indent);
         }
+        if (member is Type type)
+        {
+            foreach (var parameter in type.GetGenericArguments())
+            {
+                var description = entry?.TypeParameters.GetValueOrDefault(parameter.Name);
+                Comment(
+                    $"Type parameter {parameter.Name}: " +
+                    (string.IsNullOrWhiteSpace(description)
+                        ? $"CLR type parameter {parameter.Name}."
+                        : description),
+                    indent);
+            }
+        }
+        else if (member is MethodBase method)
+        {
+            if (method is MethodInfo { IsGenericMethodDefinition: true } genericMethod)
+            {
+                foreach (var parameter in genericMethod.GetGenericArguments())
+                {
+                    var description = entry?.TypeParameters.GetValueOrDefault(parameter.Name);
+                    Comment(
+                        $"Type parameter {parameter.Name}: " +
+                        (string.IsNullOrWhiteSpace(description)
+                            ? $"CLR method type parameter {parameter.Name}."
+                            : description),
+                        indent);
+                }
+            }
+            var parameters = method.GetParameters();
+            for (var index = 0; index < parameters.Length; index++)
+            {
+                var parameter = parameters[index];
+                var name = parameter.Name ?? $"argument{index + 1}";
+                var description = entry?.Parameters.GetValueOrDefault(name);
+                Comment(
+                    $"Parameter {ParameterName(parameter, index)}: " +
+                    (string.IsNullOrWhiteSpace(description)
+                        ? $"CLR type {FriendlyTypeName(parameter.ParameterType)}."
+                        : description),
+                    indent);
+            }
+        }
+        if (member is PropertyInfo property)
+        {
+            Comment(
+                "Value: " +
+                (string.IsNullOrWhiteSpace(entry?.Value)
+                    ? $"CLR type {FriendlyTypeName(property.PropertyType)}."
+                    : entry.Value),
+                indent);
+        }
+        else if (member is FieldInfo field && !field.DeclaringType!.IsEnum)
+        {
+            Comment(
+                "Value: " +
+                (string.IsNullOrWhiteSpace(entry?.Value)
+                    ? $"CLR type {FriendlyTypeName(field.FieldType)}."
+                    : entry.Value),
+                indent);
+        }
+        if (member is MethodInfo methodInfo && methodInfo.ReturnType != typeof(void))
+        {
+            Comment(
+                "Returns: " +
+                (string.IsNullOrWhiteSpace(entry?.Returns)
+                    ? $"CLR type {FriendlyTypeName(methodInfo.ReturnType)}."
+                    : entry.Returns),
+                indent);
+        }
         if (entry is not null)
         {
-            foreach (var parameter in entry.Parameters)
-            {
-                Comment($"Parameter {parameter.Key}: {parameter.Value}", indent);
-            }
-            if (!string.IsNullOrWhiteSpace(entry.Returns))
-            {
-                Comment("Returns: " + entry.Returns, indent);
-            }
             foreach (var exception in entry.Exceptions)
             {
                 Comment($"May return {exception.Key}: {exception.Value}", indent);
+            }
+            if (!string.IsNullOrWhiteSpace(entry.Example))
+            {
+                Comment("Example: " + entry.Example, indent);
+            }
+        }
+        if (member?.GetCustomAttribute<ObsoleteAttribute>() is { } obsolete)
+        {
+            var message = string.IsNullOrWhiteSpace(obsolete.Message) ? "This API is obsolete." : obsolete.Message;
+            if (!summary.Contains(message, StringComparison.OrdinalIgnoreCase) &&
+                !(entry?.Remarks.Contains(message, StringComparison.OrdinalIgnoreCase) ?? false))
+            {
+                Comment("Deprecated: " + message, indent);
             }
         }
         var link = learnLink ?? (member is null ? null : LearnLink(member));
         if (link is not null)
         {
+            Line($"{indent}//");
             Line($"{indent}// Microsoft Learn: {link}");
         }
     }
@@ -594,12 +669,15 @@ internal sealed class GoGenerator
         if (type?.FullName is null) return "https://learn.microsoft.com/dotnet/api/microsoft.analysisservices.tabular";
         if (type.IsConstructedGenericType) type = type.GetGenericTypeDefinition();
         var path = (type.FullName ?? type.Name).Replace('+', '.').Replace('`', '-').ToLowerInvariant();
-        if (member is not Type)
+        if (member is not Type && member is not FieldInfo { DeclaringType.IsEnum: true })
         {
             var memberName = member is ConstructorInfo ? "-ctor" : member.Name.ToLowerInvariant();
             path += "." + memberName;
         }
-        return $"https://learn.microsoft.com/dotnet/api/{path}?view=analysisservices-dotnet";
+        var view = type.Namespace?.StartsWith("Microsoft.AnalysisServices", StringComparison.Ordinal) == true
+            ? "?view=analysisservices-dotnet"
+            : string.Empty;
+        return $"https://learn.microsoft.com/dotnet/api/{path}{view}";
     }
 
     private static string ParameterName(ParameterInfo parameter, int index = 0)
@@ -671,7 +749,15 @@ internal sealed class XmlDocumentation
                     Text(member.Element("summary")),
                     Text(member.Element("remarks")),
                     Text(member.Element("returns")),
+                    Text(member.Element("value")),
+                    Text(member.Element("example")),
                     member.Elements("param")
+                        .Where(element => element.Attribute("name") is not null)
+                        .ToDictionary(
+                            element => element.Attribute("name")!.Value,
+                            Text,
+                            StringComparer.Ordinal),
+                    member.Elements("typeparam")
                         .Where(element => element.Attribute("name") is not null)
                         .ToDictionary(
                             element => element.Attribute("name")!.Value,
@@ -810,5 +896,8 @@ internal sealed record DocumentationEntry(
     string Summary,
     string Remarks,
     string Returns,
+    string Value,
+    string Example,
     IReadOnlyDictionary<string, string> Parameters,
+    IReadOnlyDictionary<string, string> TypeParameters,
     IReadOnlyDictionary<string, string> Exceptions);

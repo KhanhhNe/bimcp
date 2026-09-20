@@ -49,10 +49,12 @@ Do not edit `tom\generated.go` manually. Keep the `Microsoft.AnalysisServices` p
 ### Generated documentation
 
 `TomGen` reads the XML documentation shipped in the `Microsoft.AnalysisServices` NuGet package.
-Generated Go types and members include the official summary, remarks, parameter descriptions,
-return description, documented exceptions, and a Microsoft Learn link. When Microsoft does not
-ship XML documentation for a member, `TomGen` emits a reflection-derived description and keeps the
-Learn link so every generated declaration remains discoverable in Go tooling.
+Generated Go types and members include the official summary, remarks, type parameter and parameter
+descriptions, value and return descriptions, documented exceptions, examples, deprecation notices,
+and a Microsoft Learn link. When Microsoft omits documentation for part of a member, `TomGen`
+supplements it with reflection-derived CLR type details. Links target the corresponding Learn type
+or member page; enum values link to their containing enum because Learn does not publish separate
+pages for individual enum values.
 
 ## Low-level mapping
 
