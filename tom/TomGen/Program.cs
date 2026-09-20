@@ -547,18 +547,18 @@ internal sealed class GoGenerator
         Comment(summary, indent);
         if (!string.IsNullOrWhiteSpace(entry?.Remarks))
         {
-            Comment("Remarks: " + entry.Remarks, indent);
+            DocumentationDetail("Remarks", entry.Remarks, indent);
         }
         if (member is Type type)
         {
             foreach (var parameter in type.GetGenericArguments())
             {
                 var description = entry?.TypeParameters.GetValueOrDefault(parameter.Name);
-                Comment(
-                    $"Type parameter {parameter.Name}: " +
-                    (string.IsNullOrWhiteSpace(description)
+                DocumentationDetail(
+                    $"Type parameter {parameter.Name}",
+                    string.IsNullOrWhiteSpace(description)
                         ? $"CLR type parameter {parameter.Name}."
-                        : description),
+                        : description,
                     indent);
             }
         }
@@ -569,11 +569,11 @@ internal sealed class GoGenerator
                 foreach (var parameter in genericMethod.GetGenericArguments())
                 {
                     var description = entry?.TypeParameters.GetValueOrDefault(parameter.Name);
-                    Comment(
-                        $"Type parameter {parameter.Name}: " +
-                        (string.IsNullOrWhiteSpace(description)
+                    DocumentationDetail(
+                        $"Type parameter {parameter.Name}",
+                        string.IsNullOrWhiteSpace(description)
                             ? $"CLR method type parameter {parameter.Name}."
-                            : description),
+                            : description,
                         indent);
                 }
             }
@@ -583,50 +583,50 @@ internal sealed class GoGenerator
                 var parameter = parameters[index];
                 var name = parameter.Name ?? $"argument{index + 1}";
                 var description = entry?.Parameters.GetValueOrDefault(name);
-                Comment(
-                    $"Parameter {ParameterName(parameter, index)}: " +
-                    (string.IsNullOrWhiteSpace(description)
+                DocumentationDetail(
+                    $"Parameter {ParameterName(parameter, index)}",
+                    string.IsNullOrWhiteSpace(description)
                         ? $"CLR type {FriendlyTypeName(parameter.ParameterType)}."
-                        : description),
+                        : description,
                     indent);
             }
         }
         if (member is PropertyInfo property)
         {
-            Comment(
-                "Value: " +
-                (string.IsNullOrWhiteSpace(entry?.Value)
+            DocumentationDetail(
+                "Value",
+                string.IsNullOrWhiteSpace(entry?.Value)
                     ? $"CLR type {FriendlyTypeName(property.PropertyType)}."
-                    : entry.Value),
+                    : entry.Value,
                 indent);
         }
         else if (member is FieldInfo field && !field.DeclaringType!.IsEnum)
         {
-            Comment(
-                "Value: " +
-                (string.IsNullOrWhiteSpace(entry?.Value)
+            DocumentationDetail(
+                "Value",
+                string.IsNullOrWhiteSpace(entry?.Value)
                     ? $"CLR type {FriendlyTypeName(field.FieldType)}."
-                    : entry.Value),
+                    : entry.Value,
                 indent);
         }
         if (member is MethodInfo methodInfo && methodInfo.ReturnType != typeof(void))
         {
-            Comment(
-                "Returns: " +
-                (string.IsNullOrWhiteSpace(entry?.Returns)
+            DocumentationDetail(
+                "Returns",
+                string.IsNullOrWhiteSpace(entry?.Returns)
                     ? $"CLR type {FriendlyTypeName(methodInfo.ReturnType)}."
-                    : entry.Returns),
+                    : entry.Returns,
                 indent);
         }
         if (entry is not null)
         {
             foreach (var exception in entry.Exceptions)
             {
-                Comment($"May return {exception.Key}: {exception.Value}", indent);
+                DocumentationDetail($"May return {exception.Key}", exception.Value, indent);
             }
             if (!string.IsNullOrWhiteSpace(entry.Example))
             {
-                Comment("Example: " + entry.Example, indent);
+                DocumentationDetail("Example", entry.Example, indent);
             }
         }
         if (member?.GetCustomAttribute<ObsoleteAttribute>() is { } obsolete)
@@ -635,15 +635,21 @@ internal sealed class GoGenerator
             if (!summary.Contains(message, StringComparison.OrdinalIgnoreCase) &&
                 !(entry?.Remarks.Contains(message, StringComparison.OrdinalIgnoreCase) ?? false))
             {
-                Comment("Deprecated: " + message, indent);
+                DocumentationDetail("Deprecated", message, indent);
             }
         }
         var link = learnLink ?? (member is null ? null : LearnLink(member));
         if (link is not null)
         {
-            Line($"{indent}//");
-            Line($"{indent}// Microsoft Learn: {link}");
+            DocumentationDetail("Microsoft Learn", link, indent);
         }
+    }
+
+    private void DocumentationDetail(string label, string text, string indent)
+    {
+        Line($"{indent}//");
+        Line($"{indent}// {label}:");
+        Comment(text, indent);
     }
 
     private void Comment(string text, string indent)
