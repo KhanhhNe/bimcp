@@ -49,12 +49,12 @@ To test whether independent TOM requests overlap, run:
 go run . --concurrency-test
 ```
 
-This warms every column, fetches each column's complete scalar snapshot repeatedly first
-sequentially and then from synchronized goroutines, and exits. The default is 1,000 snapshots per
-column; use `--concurrency-iterations` to change it. The report includes sequential and concurrent
-wall time, the speedup, peak Go calls in flight, and per-column concurrent start/end offsets. A
-concurrent wall time close to the sequential wall time indicates that TOM or Power BI is processing
-the requests one by one.
+This runs sequential and synchronized-goroutine comparisons for distinct and shared column
+snapshots, scalar property reads, table snapshots, collection enumeration, and a mixed metadata
+workload. By default it tests 2, 4, 8, 16, and 32 workers with 1,000 calls per worker. Use
+`--concurrency-workers` and `--concurrency-iterations` to change the matrix, or
+`--concurrency-details` to include per-worker start/end offsets. A speedup close to 1x as workers
+increase indicates that TOM or Power BI is processing that operation one call at a time.
 
 The default DLL path is `tom\bin\tombridge.dll`. Set `TOM_BRIDGE_DLL` to load another build.
 
