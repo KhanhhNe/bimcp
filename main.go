@@ -4,9 +4,13 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
+	"time"
 
 	"bimcp/tom"
 )
+
+const modelPollInterval = time.Second
 
 func main() {
 	client, err := tom.Open("")
@@ -40,33 +44,33 @@ func main() {
 		log.Fatal(err)
 	}
 	database := tom.AsDatabase(databaseValue)
-	if err := database.Refresh(); err != nil {
-		log.Fatal(err)
-	}
-	typedModel, err := database.Model()
-	if err != nil {
-		log.Fatal(err)
-	}
-	tables, err := readTOMTables(typedModel)
+	tables, err := loadTOMTables(database)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	for _, table := range tables {
-		if err := os.MkdirAll(table.name, 0755); err != nil {
-			log.Fatalf("create folder for table %q: %v", table.name, err)
-		}
-		fmt.Printf("Table: %s (%d columns, %d measures)\n", table.name, len(table.columns), len(table.measures))
-		for _, columnName := range table.columns {
-			fmt.Printf("  Column: %s\n", columnName)
-		}
-		for _, measureName := range table.measures {
-			fmt.Printf("  Measure: %s\n", measureName)
+		if err := emitTable(table); err != nil {
+			log.Fatal(err)
 		}
 	}
 
 	fmt.Printf("Watching Power BI model with %d tables\n", len(tables))
-	for {
+	known := tableNames(tables)
+	ticker := time.NewTicker(modelPollInterval)
+	defer ticker.Stop()
+	for range ticker.C {
+		tables, err := loadTOMTables(database)
+		if err != nil {
+			log.Printf("refresh Power BI model: %v", err)
+			continue
+		}
+		for _, table := range newTables(known, tables) {
+			if err := emitTable(table); err != nil {
+				log.Printf("detect table %q: %v", table.name, err)
+			}
+		}
+		known = tableNames(tables)
 	}
 }
 
@@ -74,6 +78,17 @@ type tableMetadata struct {
 	name     string
 	columns  []string
 	measures []string
+}
+
+func loadTOMTables(database tom.Database) ([]tableMetadata, error) {
+	if err := database.Refresh(); err != nil {
+		return nil, err
+	}
+	model, err := database.Model()
+	if err != nil {
+		return nil, err
+	}
+	return readTOMTables(model)
 }
 
 func readTOMTables(model tom.Model) ([]tableMetadata, error) {
@@ -128,4 +143,36 @@ func readTOMTables(model tom.Model) ([]tableMetadata, error) {
 		result = append(result, metadata)
 	}
 	return result, nil
+}
+
+func emitTable(table tableMetadata) error {
+	if err := os.MkdirAll(table.name, 0755); err != nil {
+		return fmt.Errorf("create folder for table %q: %w", table.name, err)
+	}
+	fmt.Printf("Table: %s (%d columns, %d measures)\n", table.name, len(table.columns), len(table.measures))
+	for _, columnName := range table.columns {
+		fmt.Printf("  Column: %s\n", columnName)
+	}
+	for _, measureName := range table.measures {
+		fmt.Printf("  Measure: %s\n", measureName)
+	}
+	return nil
+}
+
+func tableNames(tables []tableMetadata) map[string]struct{} {
+	names := make(map[string]struct{}, len(tables))
+	for _, table := range tables {
+		names[strings.ToLower(table.name)] = struct{}{}
+	}
+	return names
+}
+
+func newTables(known map[string]struct{}, tables []tableMetadata) []tableMetadata {
+	result := make([]tableMetadata, 0)
+	for _, table := range tables {
+		if _, exists := known[strings.ToLower(table.name)]; !exists {
+			result = append(result, table)
+		}
+	}
+	return result
 }
