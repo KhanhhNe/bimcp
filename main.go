@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -62,16 +61,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var serializedText string
-	options, optionsErr := tom.NewSerializeOptions(client)
-	if optionsErr == nil {
-		serialized, serializeErr := tom.JsonSerializerSerializeDatabase(client, typedDatabase, options)
-		if serializeErr == nil {
-			serializedText = serialized
-			fmt.Printf("Serialized metadata: %d bytes; contains financials=%t\n",
-				len(serialized), strings.Contains(strings.ToLower(serialized), `"financials"`))
-		}
-	}
 	tables, err := typedModel.Tables()
 	if err != nil {
 		log.Fatal(err)
@@ -104,9 +93,6 @@ func main() {
 	}
 
 	if financials.Handle == 0 {
-		if serializedText != "" && printSerializedTable(serializedText, "financials") {
-			return
-		}
 		log.Fatal(`table "financials" was not found in the connected model`)
 	}
 
@@ -168,72 +154,4 @@ func main() {
 		fmt.Printf("  - %s | format=%v | hidden=%v\n      %v\n",
 			name, format, hidden, expression)
 	}
-}
-
-func printSerializedTable(metadata, tableName string) bool {
-	var document any
-	if err := json.Unmarshal([]byte(metadata), &document); err != nil {
-		log.Printf("parse serialized TOM metadata: %v", err)
-		return false
-	}
-	table := findTable(document, tableName)
-	if table == nil {
-		return false
-	}
-
-	columns := objectList(table["columns"])
-	fmt.Printf("\n%s columns (%d):\n", tableName, len(columns))
-	for _, column := range columns {
-		fmt.Printf("  - %v | type=%v | hidden=%v\n",
-			column["name"], column["dataType"], boolValue(column["isHidden"]))
-	}
-
-	measures := objectList(table["measures"])
-	fmt.Printf("\n%s measures (%d):\n", tableName, len(measures))
-	for _, measure := range measures {
-		fmt.Printf("  - %v | format=%v | hidden=%v\n      %v\n",
-			measure["name"], measure["formatString"], boolValue(measure["isHidden"]), measure["expression"])
-	}
-	return true
-}
-
-func findTable(node any, tableName string) map[string]any {
-	switch value := node.(type) {
-	case map[string]any:
-		if tables, ok := value["tables"]; ok {
-			for _, table := range objectList(tables) {
-				if name, ok := table["name"].(string); ok && strings.EqualFold(name, tableName) {
-					return table
-				}
-			}
-		}
-		for _, child := range value {
-			if table := findTable(child, tableName); table != nil {
-				return table
-			}
-		}
-	case []any:
-		for _, child := range value {
-			if table := findTable(child, tableName); table != nil {
-				return table
-			}
-		}
-	}
-	return nil
-}
-
-func objectList(value any) []map[string]any {
-	items, _ := value.([]any)
-	result := make([]map[string]any, 0, len(items))
-	for _, item := range items {
-		if object, ok := item.(map[string]any); ok {
-			result = append(result, object)
-		}
-	}
-	return result
-}
-
-func boolValue(value any) bool {
-	result, _ := value.(bool)
-	return result
 }
