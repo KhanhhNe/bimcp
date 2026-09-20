@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -48,23 +47,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	options, err := tom.NewSerializeOptions(client)
-	if err != nil {
-		log.Fatal(err)
-	}
-	serialized, err := tom.JsonSerializerSerializeDatabase(client, database, options)
-	if err != nil {
-		log.Fatal(err)
-	}
 	tables, err := readTOMTables(typedModel)
 	if err != nil {
 		log.Fatal(err)
-	}
-	if len(tables) == 0 {
-		tables, err = readSerializedTables(serialized)
-		if err != nil {
-			log.Fatal(err)
-		}
 	}
 
 	for _, table := range tables {
@@ -143,69 +128,4 @@ func readTOMTables(model tom.Model) ([]tableMetadata, error) {
 		result = append(result, metadata)
 	}
 	return result, nil
-}
-
-func readSerializedTables(metadata string) ([]tableMetadata, error) {
-	var document any
-	if err := json.Unmarshal([]byte(metadata), &document); err != nil {
-		return nil, fmt.Errorf("parse serialized TOM metadata: %w", err)
-	}
-
-	tables := findTableObjects(document)
-	result := make([]tableMetadata, 0, len(tables))
-	for _, table := range tables {
-		name, _ := table["name"].(string)
-		if name == "" {
-			continue
-		}
-		result = append(result, tableMetadata{
-			name:     name,
-			columns:  objectNames(table["columns"]),
-			measures: objectNames(table["measures"]),
-		})
-	}
-	return result, nil
-}
-
-func findTableObjects(node any) []map[string]any {
-	switch value := node.(type) {
-	case map[string]any:
-		if tables := objectList(value["tables"]); len(tables) > 0 {
-			return tables
-		}
-		for _, child := range value {
-			if tables := findTableObjects(child); len(tables) > 0 {
-				return tables
-			}
-		}
-	case []any:
-		for _, child := range value {
-			if tables := findTableObjects(child); len(tables) > 0 {
-				return tables
-			}
-		}
-	}
-	return nil
-}
-
-func objectList(value any) []map[string]any {
-	items, _ := value.([]any)
-	result := make([]map[string]any, 0, len(items))
-	for _, item := range items {
-		if object, ok := item.(map[string]any); ok {
-			result = append(result, object)
-		}
-	}
-	return result
-}
-
-func objectNames(value any) []string {
-	objects := objectList(value)
-	result := make([]string, 0, len(objects))
-	for _, object := range objects {
-		if name, ok := object["name"].(string); ok {
-			result = append(result, name)
-		}
-	}
-	return result
 }

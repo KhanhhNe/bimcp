@@ -272,6 +272,10 @@ public static class NativeExports
 
         var items = new JsonArray();
         var limit = command["limit"]?.GetValue<int>() ?? int.MaxValue;
+        if (limit == 0)
+        {
+            limit = int.MaxValue;
+        }
         foreach (var item in enumerable)
         {
             if (items.Count >= limit)
