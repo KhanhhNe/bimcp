@@ -19,6 +19,9 @@ Power BI Desktop must be open with a report loaded.
 go run .
 ```
 
+The build caches fingerprints for the native bridge and Go wrapper generator under `tom\obj`.
+Unchanged stages are skipped on subsequent runs. Use `.\build.ps1 -Force` to rebuild both stages.
+
 The example discovers the open Power BI Desktop Analysis Services workspace, connects to it,
 reads `Server.Databases[0].Model.Tables`, and prints each table with its TOM visibility, columns,
 measures, attribute hierarchies, and variations. Hidden/private Power BI-generated tables are
