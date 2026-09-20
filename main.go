@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
-	"strings"
+	"os"
 
 	"bimcp/tom"
 )
@@ -21,7 +21,8 @@ func main() {
 	if len(instances) == 0 {
 		log.Fatal("no open Power BI Desktop instance found")
 	}
-	fmt.Printf("Power BI: %s\n", instances[0].Endpoint)
+	fmt.Printf("Instances count %d\n", len(instances))
+	fmt.Printf("Using instance %s\n", instances[0].Endpoint)
 
 	server, err := client.Connect(instances[0].Endpoint)
 	if err != nil {
@@ -30,128 +31,101 @@ func main() {
 	defer server.Release()
 
 	typedServer := tom.AsServer(server)
-	connectionState, err := typedServer.GetConnectionState(false)
-	if err != nil {
-		log.Fatal(err)
-	}
-	version, err := typedServer.Version()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("TOM server version: %v; state: %v\n", version, connectionState)
-
 	databases, err := typedServer.Databases()
 	if err != nil {
 		log.Fatal(err)
 	}
-	database, err := databases.Index(0)
+	databaseValue, err := databases.Index(0)
 	if err != nil {
 		log.Fatal(err)
 	}
-	typedDatabase := tom.AsDatabase(database)
-	databaseName, err := typedDatabase.Name()
+	database := tom.AsDatabase(databaseValue)
+	if err := database.Refresh(); err != nil {
+		log.Fatal(err)
+	}
+	typedModel, err := database.Model()
+	if err != nil {
+		log.Fatal(err)
+	}
+	tables, err := readTOMTables(typedModel)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := typedDatabase.Refresh(); err != nil {
-		log.Fatal(err)
+	for _, table := range tables {
+		if err := os.MkdirAll(table.name, 0755); err != nil {
+			log.Fatalf("create folder for table %q: %v", table.name, err)
+		}
+		fmt.Printf("Table: %s (%d columns, %d measures)\n", table.name, len(table.columns), len(table.measures))
+		for _, columnName := range table.columns {
+			fmt.Printf("  Column: %s\n", columnName)
+		}
+		for _, measureName := range table.measures {
+			fmt.Printf("  Measure: %s\n", measureName)
+		}
 	}
-	typedModel, err := typedDatabase.Model()
-	if err != nil {
-		log.Fatal(err)
+
+	fmt.Printf("Watching Power BI model with %d tables\n", len(tables))
+	for {
 	}
-	tables, err := typedModel.Tables()
+}
+
+type tableMetadata struct {
+	name     string
+	columns  []string
+	measures []string
+}
+
+func readTOMTables(model tom.Model) ([]tableMetadata, error) {
+	tables, err := model.Tables()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	tableItems, err := tables.Items(0)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	fmt.Printf("Database: %s\nTables (%d):\n", databaseName, len(tableItems))
-	var financials tom.Value
+	result := make([]tableMetadata, 0, len(tableItems))
 	for _, item := range tableItems {
 		table := tom.AsTable(item)
 		name, err := table.Name()
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 		columns, err := table.Columns()
 		if err != nil {
-			log.Fatal(err)
+			return nil, fmt.Errorf("get columns for table %q: %w", name, err)
 		}
-		count, err := columns.Count()
+		columnItems, err := columns.Items(0)
 		if err != nil {
-			log.Fatal(err)
+			return nil, fmt.Errorf("enumerate columns for table %q: %w", name, err)
 		}
-		fmt.Printf("  - %s (%d columns)\n", name, count)
-		if strings.EqualFold(name, "financials") {
-			financials = item
+		measures, err := table.Measures()
+		if err != nil {
+			return nil, fmt.Errorf("get measures for table %q: %w", name, err)
 		}
-	}
+		measureItems, err := measures.Items(0)
+		if err != nil {
+			return nil, fmt.Errorf("enumerate measures for table %q: %w", name, err)
+		}
 
-	if financials.Handle == 0 {
-		log.Fatal(`table "financials" was not found in the connected model`)
-	}
-
-	table := tom.AsTable(financials)
-	columns, err := table.Columns()
-	if err != nil {
-		log.Fatal(err)
-	}
-	columnItems, err := columns.Items(0)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("\nfinancials columns (%d):\n", len(columnItems))
-	for _, item := range columnItems {
-		column := tom.AsColumn(item)
-		name, err := column.Name()
-		if err != nil {
-			log.Fatal(err)
+		metadata := tableMetadata{name: name}
+		for _, item := range columnItems {
+			columnName, err := tom.AsColumn(item).Name()
+			if err != nil {
+				return nil, fmt.Errorf("get column name for table %q: %w", name, err)
+			}
+			metadata.columns = append(metadata.columns, columnName)
 		}
-		dataType, err := column.DataType()
-		if err != nil {
-			log.Fatal(err)
+		for _, item := range measureItems {
+			measureName, err := tom.AsMeasure(item).Name()
+			if err != nil {
+				return nil, fmt.Errorf("get measure name for table %q: %w", name, err)
+			}
+			metadata.measures = append(metadata.measures, measureName)
 		}
-		hidden, err := column.IsHidden()
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("  - %s | type=%v | hidden=%v\n",
-			name, dataType, hidden)
+		result = append(result, metadata)
 	}
-
-	measures, err := table.Measures()
-	if err != nil {
-		log.Fatal(err)
-	}
-	measureItems, err := measures.Items(0)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("\nfinancials measures (%d):\n", len(measureItems))
-	for _, item := range measureItems {
-		measure := tom.AsMeasure(item)
-		name, err := measure.Name()
-		if err != nil {
-			log.Fatal(err)
-		}
-		format, err := measure.FormatString()
-		if err != nil {
-			log.Fatal(err)
-		}
-		hidden, err := measure.IsHidden()
-		if err != nil {
-			log.Fatal(err)
-		}
-		expression, err := measure.Expression()
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("  - %s | format=%v | hidden=%v\n      %v\n",
-			name, format, hidden, expression)
-	}
+	return result, nil
 }
