@@ -85,7 +85,7 @@ transformations apply consistently across `generated.go`.
 | Static members become package functions prefixed with the owning type name. | CLR static members are accessed through the type. |
 | `void` methods return `error`. Other methods return `(value, error)`. | CLR methods return their declared value or `void` and throw exceptions. |
 | Overloads receive deterministic `With<ParameterNames>` suffixes and send the complete CLR parameter signature to the bridge. | CLR resolves overloads from the compile-time argument types. |
-| Collection properties may receive typed `<ItemType>Items(limit)` helpers. | TOM exposes the collection, which is then enumerated separately. These helpers are bridge conveniences. |
+| Collection properties may receive typed `<ItemType>Items(limit)` helpers. The item type is inferred from `IEnumerable<T>` or, for legacy non-generic collections, an unambiguous typed indexer. | TOM exposes the collection, which is then enumerated separately. These helpers are bridge conveniences. |
 | Enums are generated as named Go `string` types and cross the bridge by enum name. | CLR enums have integral backing values. |
 | `Guid`, `DateTime`, `DateTimeOffset`, and `TimeSpan` results map to `string`. | CLR exposes dedicated value types. |
 | `decimal` results map to `float64`. | CLR `decimal` has greater decimal precision than `float64`. |

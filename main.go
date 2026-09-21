@@ -47,15 +47,14 @@ func main() {
 		log.Fatalf("%+v", err)
 	}
 
-	databases, err := server.Databases()
+	databases, err := server.DatabaseItems(0)
 	if err != nil {
 		log.Fatalf("%+v", err)
 	}
-	databaseValue, err := databases.Index(0)
-	if err != nil {
-		log.Fatalf("%+v", err)
+	if len(databases) == 0 {
+		log.Fatal("connected Analysis Services instance has no databases")
 	}
-	database := tom.AsDatabase(databaseValue)
+	database := databases[0]
 	tables, err := loadTOMTables(database)
 	if err != nil {
 		log.Fatalf("%+v", err)
