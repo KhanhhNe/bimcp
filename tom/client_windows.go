@@ -157,14 +157,6 @@ func (c *Client) Discover() ([]Instance, error) {
 	return result, errtrace.Wrap(err)
 }
 
-// Connect opens a TOM server connection to an Analysis Services endpoint.
-func (c *Client) Connect(endpoint string) (Value, error) {
-	var result Value
-	err := c.Call(map[string]any{"op": "connect", "endpoint": endpoint}, &result)
-	result.client = c
-	return result, errtrace.Wrap(err)
-}
-
 // Create constructs a managed object by selecting a compatible constructor at runtime.
 func (c *Client) Create(typeName string, args ...any) (Value, error) {
 	var result Value
