@@ -38,14 +38,16 @@ func main() {
 	fmt.Printf("Instances count %d\n", len(instances))
 	fmt.Printf("Using instance %s\n", instances[0].Endpoint)
 
-	server, err := client.Connect(instances[0].Endpoint)
+	server, err := tom.NewServer(client)
 	if err != nil {
 		log.Fatalf("%+v", err)
 	}
 	defer server.Release()
+	if err := server.Connect(instances[0].Endpoint); err != nil {
+		log.Fatalf("%+v", err)
+	}
 
-	typedServer := tom.AsServer(server)
-	databases, err := typedServer.Databases()
+	databases, err := server.Databases()
 	if err != nil {
 		log.Fatalf("%+v", err)
 	}

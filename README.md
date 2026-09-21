@@ -49,6 +49,9 @@ tables, err := typedModel.TableItems(0)
 err = typedModel.SaveChanges()
 ```
 
+See [`tom/README.md`](tom/README.md) for the complete list of handwritten bridge APIs and
+systematic differences between the generated Go API and the original .NET TOM library.
+
 Readable collection properties also get typed `<Item>Items(limit)` helpers, such as
 `Model.TableItems`, `Table.ColumnItems`, and `Table.MeasureItems`. A positive limit stops
 enumeration after that many items; zero returns the full collection.

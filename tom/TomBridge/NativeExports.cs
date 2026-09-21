@@ -63,7 +63,6 @@ public static class NativeExports
         return RequiredString(command, "op") switch
         {
             "discover" => Discover(),
-            "connect" => Connect(command),
             "create" => Create(command),
             "get" => Get(command),
             "snapshot" => Snapshot(command),
@@ -122,25 +121,6 @@ public static class NativeExports
         }
 
         return results;
-    }
-
-    private static JsonNode Connect(JsonObject command)
-    {
-        var endpoint = command["endpoint"]?.GetValue<string>();
-        if (string.IsNullOrWhiteSpace(endpoint))
-        {
-            var instances = Discover().AsArray();
-            if (instances.Count == 0)
-            {
-                throw new InvalidOperationException("No running Power BI Desktop Analysis Services instance was found.");
-            }
-
-            endpoint = instances[0]!["endpoint"]!.GetValue<string>();
-        }
-
-        var server = new TOM.Server();
-        server.Connect(endpoint);
-        return ToJson(server);
     }
 
     private static JsonNode? Create(JsonObject command)
