@@ -1,8 +1,0 @@
-<Directives xmlns="http://schemas.microsoft.com/netfx/2013/01/metadata">
-  <Application>
-    <Assembly Name="Microsoft.AnalysisServices.Tabular" Dynamic="Required All" />
-    <Assembly Name="Microsoft.AnalysisServices.Core" Dynamic="Required All" />
-    <Assembly Name="System.Private.Xml" Dynamic="Required All" />
-    <Assembly Name="System.Xml.ReaderWriter" Dynamic="Required All" />
-  </Application>
-</Directives>
