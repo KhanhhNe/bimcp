@@ -63582,6 +63582,23 @@ func (receiver Server) Databases() (DatabaseCollection, error) {
 	return AsDatabaseCollection(result), err
 }
 
+// DatabaseItems gets Server.Databases and returns up to limit items.
+func (receiver Server) DatabaseItems(limit int) ([]Database, error) {
+	collection, err := receiver.Databases()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Database, len(items))
+	for index := range items {
+		result[index] = AsDatabase(items[index])
+	}
+	return result, err
+}
+
 // Gets or sets the description of major object.
 //
 // Value:
@@ -63774,6 +63791,23 @@ func (receiver Server) Roles() (RoleCollection, error) {
 	return AsRoleCollection(result), err
 }
 
+// RoleItems gets Server.Roles and returns up to limit items.
+func (receiver Server) RoleItems(limit int) ([]Role, error) {
+	collection, err := receiver.Roles()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Role, len(items))
+	for index := range items {
+		result[index] = AsRole(items[index])
+	}
+	return result, err
+}
+
 // Gets or sets the location of the server, which is either on-premises or in a Microsoft data center that
 // provides internal hosting of tabular models for Microsoft's online services, (for example, Excel data models
 // viewed in Office 365). This is read-only.
@@ -63896,6 +63930,23 @@ func (receiver Server) SetSupportsNewMetadataVersioning(input bool) error {
 func (receiver Server) Traces() (TraceCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("Traces")
 	return AsTraceCollection(result), err
+}
+
+// TraceItems gets Server.Traces and returns up to limit items.
+func (receiver Server) TraceItems(limit int) ([]Trace, error) {
+	collection, err := receiver.Traces()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]Trace, len(items))
+	for index := range items {
+		result[index] = AsTrace(items[index])
+	}
+	return result, err
 }
 
 // Gets or sets the server version. This is read-only.
@@ -74488,6 +74539,23 @@ func (receiver Trace) SetDescription(input string) error {
 func (receiver Trace) Events() (TraceEventCollection, error) {
 	result, err := receiver.objectRef.Value.GetValue("Events")
 	return AsTraceEventCollection(result), err
+}
+
+// TraceEventItems gets Trace.Events and returns up to limit items.
+func (receiver Trace) TraceEventItems(limit int) ([]TraceEvent, error) {
+	collection, err := receiver.Events()
+	if err != nil {
+		return nil, err
+	}
+	if collection.TOMValue().Handle == 0 {
+		return nil, nil
+	}
+	items, err := collection.Items(limit)
+	result := make([]TraceEvent, len(items))
+	for index := range items {
+		result[index] = AsTraceEvent(items[index])
+	}
+	return result, err
 }
 
 // Gets or sets the specified filter to add.

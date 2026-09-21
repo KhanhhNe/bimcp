@@ -277,12 +277,27 @@ internal sealed class GoGenerator
         GeneratedMemberCount++;
     }
 
-    private static Type? CollectionItemType(Type type) =>
-        type.GetInterfaces()
+    private Type? CollectionItemType(Type type)
+    {
+        var enumerableItem = type.GetInterfaces()
             .Where(candidate => candidate.IsGenericType &&
                                 candidate.GetGenericTypeDefinition() == typeof(IEnumerable<>))
             .Select(candidate => candidate.GetGenericArguments()[0])
             .FirstOrDefault();
+        if (enumerableItem is not null)
+        {
+            return enumerableItem;
+        }
+
+        var indexerItems = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+            .Where(property => property.CanRead &&
+                               property.GetIndexParameters().Length == 1 &&
+                               _goNames.ContainsKey(property.PropertyType))
+            .Select(property => property.PropertyType)
+            .Distinct()
+            .ToArray();
+        return indexerItems.Length == 1 ? indexerItems[0] : null;
+    }
 
     private void GenerateInstanceField(string owner, FieldInfo field, HashSet<string> reservedNames)
     {
