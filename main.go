@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"bimcp/tom"
+
+	"braces.dev/errtrace"
 )
 
 const modelPollInterval = time.Second
@@ -23,12 +25,12 @@ func main() {
 
 	client, err := tom.Open("")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("%+v", err)
 	}
 
 	instances, err := client.Discover()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("%+v", err)
 	}
 	if len(instances) == 0 {
 		log.Fatal("no open Power BI Desktop instance found")
@@ -38,28 +40,28 @@ func main() {
 
 	server, err := client.Connect(instances[0].Endpoint)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("%+v", err)
 	}
 	defer server.Release()
 
 	typedServer := tom.AsServer(server)
 	databases, err := typedServer.Databases()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("%+v", err)
 	}
 	databaseValue, err := databases.Index(0)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("%+v", err)
 	}
 	database := tom.AsDatabase(databaseValue)
 	tables, err := loadTOMTables(database)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("%+v", err)
 	}
 
 	for _, table := range tables {
 		if err := emitTable(outputPath, table); err != nil {
-			log.Fatal(err)
+			log.Fatalf("%+v", err)
 		}
 	}
 
@@ -70,12 +72,12 @@ func main() {
 	for range ticker.C {
 		tables, err := loadTOMTables(database)
 		if err != nil {
-			log.Printf("refresh Power BI model: %v", err)
+			log.Printf("refresh Power BI model: %+v", err)
 			continue
 		}
 		for _, table := range newTables(known, tables) {
 			if err := emitTable(outputPath, table); err != nil {
-				log.Printf("emit table %q: %v", table.name, err)
+				log.Printf("emit table %q: %+v", table.name, err)
 			}
 		}
 		known = tableNames(tables)
@@ -100,97 +102,68 @@ type measureMetadata struct {
 
 func loadTOMTables(database tom.Database) ([]tableMetadata, error) {
 	if err := database.Refresh(); err != nil {
-		return nil, err
+		return nil, errtrace.Wrap(err)
 	}
 	model, err := database.Model()
 	if err != nil {
-		return nil, err
+		return nil, errtrace.Wrap(err)
 	}
-	return readTOMTables(model)
+	return errtrace.Wrap2(readTOMTables(model))
 }
 
 func readTOMTables(model tom.Model) ([]tableMetadata, error) {
-	tables, err := model.Tables()
+	tableItems, err := model.TableItems(0)
 	if err != nil {
-		return nil, err
-	}
-	tableItems, err := tables.Items(0)
-	if err != nil {
-		return nil, err
+		return nil, errtrace.Wrap(err)
 	}
 
 	result := make([]tableMetadata, 0, len(tableItems))
-	for _, item := range tableItems {
-		table, err := tom.AsTable(item).Snapshot()
+	for _, table := range tableItems {
+		table, err = table.Snapshot()
 		if err != nil {
-			return nil, fmt.Errorf("snapshot table: %w", err)
+			return nil, errtrace.Errorf("snapshot table: %w", err)
 		}
 		if table.IsHidden || table.IsPrivate {
 			continue
 		}
-		columns, err := table.Columns()
+		columnItems, err := table.ColumnItems(0)
 		if err != nil {
-			return nil, fmt.Errorf("get columns for table %q: %w", table.Name, err)
+			return nil, errtrace.Errorf("enumerate columns for table %q: %w", table.Name, err)
 		}
-		columnItems, err := columns.Items(0)
+		measureItems, err := table.MeasureItems(0)
 		if err != nil {
-			return nil, fmt.Errorf("enumerate columns for table %q: %w", table.Name, err)
-		}
-		measures, err := table.Measures()
-		if err != nil {
-			return nil, fmt.Errorf("get measures for table %q: %w", table.Name, err)
-		}
-		measureItems, err := measures.Items(0)
-		if err != nil {
-			return nil, fmt.Errorf("enumerate measures for table %q: %w", table.Name, err)
+			return nil, errtrace.Errorf("enumerate measures for table %q: %w", table.Name, err)
 		}
 
 		metadata := tableMetadata{name: table.Name}
-		for _, item := range columnItems {
-			column, err := tom.AsColumn(item).Snapshot()
+		for _, column := range columnItems {
+			column, err = column.Snapshot()
+			if err != nil {
+				return nil, errtrace.Errorf("snapshot column for table %q: %w", table.Name, err)
+			}
 			if column.IsHidden {
 				continue
 			}
-			dataType, err := readProperty[tom.DataType](column.TOMValue(), "DataType")
-			if err != nil {
-				return nil, fmt.Errorf("read column type for %q.%q: %w", table.Name, column.Name, err)
-			}
-			metadata.columns = append(metadata.columns, columnMetadata{name: column.Name, dataType: dataType})
+			metadata.columns = append(metadata.columns, columnMetadata{name: column.Name, dataType: column.DataType})
 		}
-		for _, item := range measureItems {
-			measure := tom.AsMeasure(item)
-			measureName, err := readProperty[string](measure.TOMValue(), "Name")
+		for _, measure := range measureItems {
+			measure, err = measure.Snapshot()
 			if err != nil {
-				return nil, fmt.Errorf("read measure name for table %q: %w", table.Name, err)
+				return nil, errtrace.Errorf("snapshot measure for table %q: %w", table.Name, err)
 			}
-			isHidden, err := readProperty[bool](measure.TOMValue(), "IsHidden")
-			if err != nil {
-				return nil, fmt.Errorf("read measure visibility for %q.%q: %w", table.Name, measureName, err)
-			}
-			if isHidden {
+			if measure.IsHidden {
 				continue
 			}
-			expression, err := readProperty[string](measure.TOMValue(), "Expression")
-			if err != nil {
-				return nil, fmt.Errorf("read measure expression for %q.%q: %w", table.Name, measureName, err)
-			}
-			metadata.measures = append(metadata.measures, measureMetadata{name: measureName, expression: expression})
+			metadata.measures = append(metadata.measures, measureMetadata{name: measure.Name, expression: measure.Expression})
 		}
 		result = append(result, metadata)
 	}
 	return result, nil
 }
-
-func readProperty[T any](value tom.Value, name string) (T, error) {
-	var result T
-	err := value.Get(name, &result)
-	return result, err
-}
-
 func emitTable(outputPath string, table tableMetadata) error {
 	tablePath := filepath.Join(outputPath, table.name)
 	if err := os.MkdirAll(tablePath, 0755); err != nil {
-		return fmt.Errorf("create folder for table %q: %w", table.name, err)
+		return errtrace.Errorf("create folder for table %q: %w", table.name, err)
 	}
 	fmt.Printf("Table: %s\n", table.name)
 	for _, column := range table.columns {

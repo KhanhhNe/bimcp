@@ -61,7 +61,8 @@ Requirements are Windows x64, Go 1.25+, the .NET 10 SDK, and Visual Studio C++ b
 2. Edit `tom\TomGen` for generated Go API shape and CLR-to-Go type mappings.
 3. Run `.\build.ps1` after either project changes. It publishes the native DLL, regenerates
    `tom\generated.go`, and formats the generated source.
-4. Run `go test .\...` and `go run .` with Power BI Desktop open.
+4. With a report open in Power BI Desktop, run `go run . --output-path .\test` and validate
+   model discovery, metadata output, table-directory creation, and detection of a newly added table.
 
 Do not edit `tom\generated.go` manually. Keep the `Microsoft.AnalysisServices` package versions in
 `TomBridge.csproj` and `TomGen.csproj` synchronized.
